@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableAutoConfiguration
 public class Application {
 
-    public static void main(   String[] args   ) {
+    public static void main(String[] args) {
         System.out.println("I am fckn working!");
         SpringApplication.run(Application.class, args);
     }
