@@ -14,5 +14,4 @@ public class Application {
         System.out.println("I am working!");
         SpringApplication.run(Application.class, args);
     }
-
 }
