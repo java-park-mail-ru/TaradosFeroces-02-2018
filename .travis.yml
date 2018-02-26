@@ -18,7 +18,7 @@ deploy:
     secure: $HEROKU_API_KEY
   app: deadlinez
   on:
-    repo: Alex-Kuz/TaradosFeroces-02-2018/
+    repo: Alex-Kuz/TaradosFeroces-02-2018
     branch: sandbox
   skip_cleanup: true
 
