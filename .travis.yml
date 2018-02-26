@@ -4,6 +4,11 @@ sudo: required
 jdk:
   - oraclejdk8
 
+branches:
+  only:
+  - develop
+  - sandbox
+
 before_install:
   - echo "start building"
 
@@ -14,6 +19,7 @@ deploy:
   app: deadlinez
   on:
     repo: Alex-Kuz/TaradosFeroces-02-2018/
+    branch: sandbox
   skip_cleanup: true
 
 install:
