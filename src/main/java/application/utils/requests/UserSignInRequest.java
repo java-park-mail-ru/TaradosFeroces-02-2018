@@ -24,9 +24,9 @@ public class UserSignInRequest {
 
     @JsonCreator
     public UserSignInRequest(@JsonProperty("login") @NotNull String login,
-                             @JsonProperty("name") @Nullable String name,
                              @JsonProperty("email") @NotNull String email,
-                             @JsonProperty("password") @NotNull String password) {
+                             @JsonProperty("password") @NotNull String password,
+                             @JsonProperty("name") @Nullable String name) {
         this.login = login;
         this.name = name;
         this.email = email;

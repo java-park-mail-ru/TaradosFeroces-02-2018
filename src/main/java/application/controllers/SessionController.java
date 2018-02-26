@@ -22,7 +22,6 @@ public class SessionController {
 
     @GetMapping(path = "/signup", consumes = JSON, produces = JSON)
     public Message signup(@RequestBody UserSignInRequest body, HttpSession httpSession) {
-
         return new Message("Created user " + body.getLogin());
     }
 }
