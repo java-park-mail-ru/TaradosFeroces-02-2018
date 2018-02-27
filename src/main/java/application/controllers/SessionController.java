@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = {"http://tf-sand-server.herokuapp.com/", "localhost"})
 @RequestMapping("/alexalone")
 public class SessionController {
     private static final String JSON = MediaType.APPLICATION_JSON_UTF8_VALUE; // "application/json;charset=UTF-8"
