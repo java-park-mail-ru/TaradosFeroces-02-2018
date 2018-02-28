@@ -24,8 +24,7 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public @NotNull Long addUser(@NotNull String login, @NotNull String email, @NotNull String password, @Nullable String name) {
-        final Long id = this.idCounter.incrementAndGet();
-        // FIXME: 28.02.18 Low-iq solution
+        final Long id = idCounter.incrementAndGet();
         users.put(id, new User(id, login, password, email, false, name));
         return id;
     }
@@ -57,7 +56,7 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public boolean checkPassword(@NotNull Long id, @NotNull String password) {
-        return this.getUserById(id).getPassword().equals(password);
+        return getUserById(id).getPassword().equals(password);
     }
 
     @Override

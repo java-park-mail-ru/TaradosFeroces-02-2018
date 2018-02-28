@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 public class User {
 
     @NotNull
-    private Long id;
+    private final Long id;
 
     @NotNull
     private String login;

@@ -4,6 +4,7 @@ package application.controllers;
 import application.dao.UserDAO;
 import application.models.User;
 import application.utils.requests.UserSignInRequest;
+import application.utils.requests.UserSignOutRequest;
 import application.utils.requests.UserSignUpRequest;
 import application.utils.responses.Message;
 
@@ -64,7 +65,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signout", consumes = JSON, produces = JSON)
-    public ResponseEntity<Message> signout(@RequestBody UserSignInRequest body, HttpSession httpSession) {
+    public ResponseEntity<Message> signout(@RequestBody UserSignOutRequest body, HttpSession httpSession) {
 
         final String login = body.getLogin();
         final User user = usersDataBase.getUserByLogin(login);
