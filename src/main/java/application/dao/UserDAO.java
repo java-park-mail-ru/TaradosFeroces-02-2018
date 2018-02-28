@@ -20,6 +20,9 @@ public interface UserDAO {
     @Nullable
     User getUserByLogin(@NotNull String login);
 
+    @Nullable
+    User getUserByEmail(@NotNull String email);
+
     void updatePassword(@NotNull Long id, @NotNull String password);
 
     void deleteUser(@NotNull Long id);

@@ -43,6 +43,13 @@ public class UserDAOImplRunTime implements UserDAO {
     }
 
     @Override
+    public @Nullable User getUserByEmail(@NotNull String email) {
+        return this.users.searchValues(4, (User user) ->
+            user.getEmail().equals(email) ? user : null
+        );
+    }
+
+    @Override
     public void updatePassword(@NotNull Long id, @NotNull String password) {
         this.users.get(id).setPassword(password);
     }
