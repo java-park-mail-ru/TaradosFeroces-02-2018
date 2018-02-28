@@ -41,7 +41,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signin", consumes = JSON, produces = JSON)
-    public ResponseEntity signup(@RequestBody UserSignInRequest body, HttpSession httpSession) {
+    public ResponseEntity signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
         String loginOrEmail = body.getLoginOrEmail();
 
@@ -56,11 +56,31 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Message("Wrong password"));
         }
-        httpSession.setAttribute(USER_ID, id);
+        // httpSession.setAttribute(USER_ID, id);
         return ResponseEntity.status(HttpStatus.OK)
                 .header("Set-Cookie", USER_ID + "=" + id.toString())
                 .body(new Message("User has sighed in!"));
     }
+
+    @PostMapping(path = "/signout", consumes = JSON, produces = JSON)
+    public ResponseEntity signout(@RequestBody UserSignInRequest body, HttpSession httpSession) {
+
+        String loginOrEmail = body.getLoginOrEmail();
+
+        User user = body.getIsLogin() ? usersDataBase.getUserByLogin(loginOrEmail) : usersDataBase.getUserByEmail(loginOrEmail);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new Message("User is not exist"));
+        }
+        Long id = user.getId();
+        // httpSession.setAttribute(USER_ID, id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Set-Cookie", USER_ID + "=")
+                .body(new Message("User logout!"));
+    }
+
+
 
 
 }
