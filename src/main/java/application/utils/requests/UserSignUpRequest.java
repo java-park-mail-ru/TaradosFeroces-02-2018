@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 
-public class UserSignInRequest {
+public class UserSignUpRequest {
 
     @NotNull
     private final String login;
@@ -23,7 +23,7 @@ public class UserSignInRequest {
     private final String name;
 
     @JsonCreator
-    public UserSignInRequest(@JsonProperty("login") @NotNull String login,
+    public UserSignUpRequest(@JsonProperty("login") @NotNull String login,
                              @JsonProperty("email") @NotNull String email,
                              @JsonProperty("password") @NotNull String password,
                              @JsonProperty("name") @Nullable String name) {

@@ -2,12 +2,13 @@ package application.controllers;
 
 
 import application.dao.UserDAO;
-import application.utils.requests.UserSignInRequest;
+import application.utils.requests.UserSignUpRequest;
 import application.utils.responses.Message;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpSession;
 
 
@@ -24,12 +25,17 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signup", consumes = JSON, produces = JSON)
-    public Message signup(@RequestBody UserSignInRequest body, HttpSession httpSession) {
-        Long id = usersDataBase.addUser(body.getLogin(), body.getEmail(), body.getPassword(), body.getName());
+    public ResponseEntity signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
+        String login = body.getLogin();
+        if (usersDataBase.getUserByLogin(login) != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new Message("User with this login exists."));
+        }
+        Long id = usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName());
 
-        System.out.println(id);
-        System.out.println(usersDataBase.getUserByLogin(body.getLogin()).getEmail());
-
-        return new Message("Created user " + usersDataBase.getUserById(id).getLogin());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new Message("User has signed up!"));
     }
+
+
 }
