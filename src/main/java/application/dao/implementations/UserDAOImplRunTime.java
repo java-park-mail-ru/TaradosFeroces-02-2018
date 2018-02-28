@@ -31,24 +31,17 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public @Nullable User getUserById(@NotNull Long id) {
-        if (this.users.containsKey(id)) {
-            return this.users.get(id);
-        }
-        return null;
+        return this.users.get(id);
     }
 
     @Override
     public @Nullable User getUserByLogin(@NotNull String login) {
-        return this.users.searchValues(4, (User user) -> {
-            return user.getLogin().equals(login) ? user : null;
-        });
+        return this.users.searchValues(4, (User user) -> user.getLogin().equals(login) ? user : null);
     }
 
     @Override
     public @Nullable User getUserByEmail(@NotNull String email) {
-        return this.users.searchValues(4, (User user) ->
-            user.getEmail().equals(email) ? user : null
-        );
+        return this.users.searchValues(4, (User user) -> user.getEmail().equals(email) ? user : null);
     }
 
     @Override
