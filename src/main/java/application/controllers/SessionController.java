@@ -51,6 +51,7 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new Message("User is not exist"));
         }
+
         final Long id = user.getId();
         if (!usersDataBase.checkPassword(id, body.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -72,6 +73,7 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new Message("User is not exist"));
         }
+
         final Long id = user.getId();
         // httpSession.setAttribute(USER_ID, id);
         return ResponseEntity.status(HttpStatus.OK)

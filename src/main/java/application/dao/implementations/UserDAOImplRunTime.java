@@ -23,34 +23,35 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public @NotNull Long addUser(@NotNull String login, @NotNull String email, @NotNull String password, @Nullable String name) {
-        Long id = this.idCounter.incrementAndGet();
+        final Long id = this.idCounter.incrementAndGet();
         // FIXME: 28.02.18 Low-iq solution
-        this.users.put(id, new User(id, login, password, email, false, name));
+        users.put(id, new User(id, login, password, email, false, name));
         return id;
     }
 
     @Override
     public @Nullable User getUserById(@NotNull Long id) {
-        return this.users.get(id);
+        return users.get(id);
     }
 
     @Override
     public @Nullable User getUserByLogin(@NotNull String login) {
-        return this.users.searchValues(4, (User user) -> user.getLogin().equals(login) ? user : null);
+        return users.searchValues(4, (User user) -> user.getLogin().equals(login) ? user : null);
     }
 
     @Override
     public @Nullable User getUserByEmail(@NotNull String email) {
-        return this.users.searchValues(4, (User user) -> user.getEmail().equals(email) ? user : null);
+        return users.searchValues(4, (User user) -> user.getEmail().equals(email) ? user : null);
     }
 
     @Override
     public void updatePassword(@NotNull Long id, @NotNull String password) {
-        this.users.get(id).setPassword(password);
+        users.get(id).setPassword(password);
     }
 
     @Override
     public void deleteUser(@NotNull Long id) {
+
     }
 
     @Override
@@ -60,6 +61,6 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public void clear() {
-        this.users.clear();
+        users.clear();
     }
 }
