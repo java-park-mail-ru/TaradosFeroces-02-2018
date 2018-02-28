@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class UserDAOImplRunTime implements UserDAO {
+    private static final int LOAD_CONST = 4;
     private ConcurrentHashMap<Long, User> users;
     private AtomicLong idCounter;
 
@@ -36,12 +37,12 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public @Nullable User getUserByLogin(@NotNull String login) {
-        return users.searchValues(4, (User user) -> user.getLogin().equals(login) ? user : null);
+        return users.searchValues(LOAD_CONST, (User user) -> user.getLogin().equals(login) ? user : null);
     }
 
     @Override
     public @Nullable User getUserByEmail(@NotNull String email) {
-        return users.searchValues(4, (User user) -> user.getEmail().equals(email) ? user : null);
+        return users.searchValues(LOAD_CONST, (User user) -> user.getEmail().equals(email) ? user : null);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public void deleteUser(@NotNull Long id) {
-
+        users.
     }
 
     @Override
