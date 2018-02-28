@@ -6,10 +6,12 @@ import application.models.User;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 
+@Component
 public class UserDAOImplRunTime implements UserDAO {
     private ConcurrentHashMap<Long, User> users;
     private AtomicLong idCounter;

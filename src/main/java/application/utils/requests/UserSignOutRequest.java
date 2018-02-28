@@ -6,21 +6,13 @@ import org.jetbrains.annotations.NotNull;
 public class UserSignOutRequest {
 
     @NotNull
-    private String loginOrEmail;
-    @NotNull
-    private Boolean isLogin;
+    private String login;
 
-    public UserSignOutRequest(@JsonProperty("login_or_email") @NotNull String loginOrEmail,
-                              @JsonProperty("is_login") @NotNull Boolean isLogin) {
-        this.loginOrEmail = loginOrEmail;
-        this.isLogin = isLogin;
+    public UserSignOutRequest(@JsonProperty("login") @NotNull String login) {
+        this.login = login;
     }
 
-    public String getLoginOrEmail() {
-        return loginOrEmail;
-    }
-
-    public Boolean getLogin() {
-        return isLogin;
+    public String getLogin() {
+        return login;
     }
 }

@@ -28,7 +28,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signup", consumes = JSON, produces = JSON)
-    public ResponseEntity signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
+    public ResponseEntity<Message> signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
         String login = body.getLogin();
         if (usersDataBase.getUserByLogin(login) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -41,11 +41,11 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signin", consumes = JSON, produces = JSON)
-    public ResponseEntity signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
+    public ResponseEntity<Message> signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
-        String loginOrEmail = body.getLoginOrEmail();
+        String login = body.getLogin();
 
-        User user = body.getIsLogin() ? usersDataBase.getUserByLogin(loginOrEmail) : usersDataBase.getUserByEmail(loginOrEmail);
+        User user = usersDataBase.getUserByLogin(login);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -63,11 +63,10 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signout", consumes = JSON, produces = JSON)
-    public ResponseEntity signout(@RequestBody UserSignInRequest body, HttpSession httpSession) {
+    public ResponseEntity<Message> signout(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
-        String loginOrEmail = body.getLoginOrEmail();
-
-        User user = body.getIsLogin() ? usersDataBase.getUserByLogin(loginOrEmail) : usersDataBase.getUserByEmail(loginOrEmail);
+        String login = body.getLogin();
+        User user = usersDataBase.getUserByLogin(login);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
