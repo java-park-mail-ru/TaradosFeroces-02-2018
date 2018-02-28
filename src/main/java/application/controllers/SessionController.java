@@ -34,7 +34,7 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new Message("User with this login exists"));
         }
-        Long id = usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName());
+        final Long id = usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new Message("User has signed up!"));
@@ -43,15 +43,15 @@ public class SessionController {
     @PostMapping(path = "/signin", consumes = JSON, produces = JSON)
     public ResponseEntity<Message> signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
-        String login = body.getLogin();
+        final String login = body.getLogin();
 
-        User user = usersDataBase.getUserByLogin(login);
+        final User user = usersDataBase.getUserByLogin(login);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new Message("User is not exist"));
         }
-        Long id = user.getId();
+        final Long id = user.getId();
         if (!usersDataBase.checkPassword(id, body.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Message("Wrong password"));
@@ -65,14 +65,14 @@ public class SessionController {
     @PostMapping(path = "/signout", consumes = JSON, produces = JSON)
     public ResponseEntity<Message> signout(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
-        String login = body.getLogin();
-        User user = usersDataBase.getUserByLogin(login);
+        final String login = body.getLogin();
+        final User user = usersDataBase.getUserByLogin(login);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new Message("User is not exist"));
         }
-        Long id = user.getId();
+        final Long id = user.getId();
         // httpSession.setAttribute(USER_ID, id);
         return ResponseEntity.status(HttpStatus.OK)
                 .header("Set-Cookie", USER_ID + "=")

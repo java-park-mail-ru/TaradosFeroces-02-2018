@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 public class UserSignOutRequest {
 
     @NotNull
-    private String login;
+    private final String login;
 
     public UserSignOutRequest(@JsonProperty("login") @NotNull String login) {
         this.login = login;
