@@ -52,7 +52,7 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public void deleteUser(@NotNull Long id) {
-        users.
+        users.remove(id);
     }
 
     @Override
