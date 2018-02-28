@@ -44,21 +44,20 @@ public class UserDAOImplRunTime implements UserDAO {
 
     @Override
     public void updatePassword(@NotNull Long id, @NotNull String password) {
-
+        this.users.get(id).setPassword(password);
     }
 
     @Override
     public void deleteUser(@NotNull Long id) {
-
     }
 
     @Override
     public boolean checkPassword(@NotNull Long id, @NotNull String password) {
-        return false;
+        return this.getUserById(id).getPassword().equals(password);
     }
 
     @Override
     public void clear() {
-
+        this.users.clear();
     }
 }
