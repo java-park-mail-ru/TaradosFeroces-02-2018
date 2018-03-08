@@ -3,16 +3,17 @@ package application.dao;
 
 import application.models.User;
 
+import application.models.id.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface UserDAO {
 
-    @NotNull /* id */
-    Long addUser(@NotNull String login,
-                 @NotNull String email,
-                 @NotNull String password,
-                 @Nullable String name);
+    @NotNull
+    Id<User> addUser(@NotNull String login,
+                     @NotNull String email,
+                     @NotNull String password,
+                     @Nullable String name);
 
     @Nullable
     User getUserById(@NotNull Long id);

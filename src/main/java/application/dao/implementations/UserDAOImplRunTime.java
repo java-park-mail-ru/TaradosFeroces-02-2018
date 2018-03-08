@@ -4,6 +4,7 @@ package application.dao.implementations;
 import application.dao.UserDAO;
 import application.models.User;
 
+import application.models.id.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -23,10 +24,11 @@ public class UserDAOImplRunTime implements UserDAO {
     }
 
     @Override
-    public @NotNull Long addUser(@NotNull String login, @NotNull String email, @NotNull String password, @Nullable String name) {
+    public @NotNull Id<User> addUser(@NotNull String login, @NotNull String email,
+                                     @NotNull String password, @Nullable String name) {
         final Long id = idCounter.incrementAndGet();
         users.put(id, new User(id, login, password, email, false, name));
-        return id;
+        return new Id<User>(id);
     }
 
     @Override

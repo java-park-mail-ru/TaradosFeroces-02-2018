@@ -1,6 +1,7 @@
 package application.models;
 
 
+import application.models.id.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 public class User {
 
     @NotNull
-    private final Long id;
+    private final Id<User> id;
 
     @NotNull
     private String login;
@@ -29,7 +30,7 @@ public class User {
                 @NotNull String email,
                 @Nullable Boolean emailChecked,
                 @Nullable String name) {
-        this.id = id;
+        this.id = new Id<>(id);
         this.login = login;
         this.password = password;
         this.email = email;
@@ -37,8 +38,8 @@ public class User {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
+    public long getId() {
+        return id.asLong();
     }
 
     public String getLogin() {
