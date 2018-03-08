@@ -24,6 +24,22 @@ public class UserDAOImplRunTime implements UserDAO {
     public UserDAOImplRunTime() {
         this.users = new ConcurrentHashMap<Long, User>();
         this.idCounter = new AtomicLong(42L);
+
+        updateScore(addUser("Alexander", "", "", "").asLong(), 100500L);
+        updateScore(addUser("Toha", "", "", "").asLong(), 27L);
+        updateScore(addUser("Danchetto", "", "", "").asLong(), 5444L);
+        updateScore(addUser("Lolkek1", "", "", "").asLong(), 218L);
+        updateScore(addUser("Lolkek2", "", "", "").asLong(), 0L);
+        updateScore(addUser("Lolkek3", "", "", "").asLong(), 314L);
+        updateScore(addUser("Lolkek4", "", "", "").asLong(), 54802L);
+        updateScore(addUser("Java is shit", "", "", "").asLong(), 21L);
+        updateScore(addUser("Lolkek5", "", "", "").asLong(), 48329L);
+        updateScore(addUser("Lolkek6", "", "", "").asLong(), 541L);
+        updateScore(addUser("Lolkek7", "", "", "").asLong(), 10000L);
+        updateScore(addUser("CPP is the fckn best lang", "", "", "").asLong(), 100L);
+        updateScore(addUser("Lolkek8", "", "", "").asLong(), 2300L);
+        updateScore(addUser("Lolkek9", "", "", "").asLong(), 178L);
+        updateScore(addUser("LolkekA", "", "", "").asLong(), 12L); 
     }
 
     @Override
