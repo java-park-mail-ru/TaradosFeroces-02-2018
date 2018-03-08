@@ -3,9 +3,12 @@ package application.dao;
 
 import application.models.User;
 
+import application.models.UserScore;
 import application.models.id.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public interface UserDAO {
 
@@ -29,6 +32,12 @@ public interface UserDAO {
     void deleteUser(@NotNull Long id);
 
     boolean checkPassword(@NotNull Long id, @NotNull String password);
+
+    UserScore scoreById(@NotNull Long id);
+
+    UserScore updateScore(@NotNull Long id, @NotNull Long newScore);
+
+    ArrayList<User> getAll();
 
     void clear();
 }

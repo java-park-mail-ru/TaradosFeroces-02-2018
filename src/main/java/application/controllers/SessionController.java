@@ -3,9 +3,11 @@ package application.controllers;
 
 import application.dao.UserDAO;
 import application.models.User;
+import application.utils.requests.ScoreRequest;
 import application.utils.requests.UserSignInRequest;
 import application.utils.requests.UserSignUpRequest;
 import application.utils.responses.Message;
+import application.utils.responses.ScoreData;
 import application.utils.responses.UserFullInfo;
 
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 @RestController
@@ -111,6 +115,24 @@ public class SessionController {
                 .status(HttpStatus.OK)
                 //.header("Set-Cookie", USER_ID + "=")
                 .body(new Message("User have gone!"));
+    }
+
+
+    @PostMapping(path = "/score", consumes = JSON, produces = JSON)
+    public ResponseEntity score(@RequestBody ScoreRequest body, HttpSession httpSession) {
+
+        final long position = body.getPosition();
+        final long count = body.getCount();
+
+        final ArrayList users = usersDataBase.getAll();
+        Collections.sort(users, new User.PointComparator());
+
+        ArrayList list = new ArrayList<User>(users.subList((int) position, (int) count));
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ScoreData(list));
+
     }
 
 }

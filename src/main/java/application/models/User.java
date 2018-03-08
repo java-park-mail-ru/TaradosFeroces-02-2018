@@ -5,6 +5,8 @@ import application.models.id.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+
 
 public class User {
 
@@ -24,22 +26,33 @@ public class User {
     @Nullable
     private String name;
 
+    @Nullable
+    private long points;
+
     public User(@NotNull Long id,
                 @NotNull String login,
                 @NotNull String password,
                 @NotNull String email,
-                @Nullable Boolean emailChecked,
                 @Nullable String name) {
         this.id = new Id<>(id);
         this.login = login;
         this.password = password;
         this.email = email;
-        this.emailChecked = emailChecked;
+        this.emailChecked = false;
         this.name = name;
+        this.points = 0L;
     }
 
     public long getId() {
         return id.asLong();
+    }
+
+    public long getPoints() {
+        return points;
+    }
+
+    public void setPoints(long points) {
+        this.points = points;
     }
 
     public String getLogin() {
@@ -80,5 +93,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public static class PointComparator implements Comparator<User> {
+
+        @Override
+        public int compare(User user, User t1) {
+            return Long.compare(user.getPoints(), t1.getPoints());
+        }
     }
 }

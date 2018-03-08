@@ -5,15 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class UserFullInfo {
 
-    @NotNull
-    @JsonProperty("id")
-    private final long id;
-
-    @NotNull
-    @JsonProperty("login")
-    private String login;
+public class UserFullInfo extends UserInfo {
 
     @NotNull
     @JsonProperty("email")
@@ -24,8 +17,7 @@ public class UserFullInfo {
     private String name;
 
     public UserFullInfo(User user) {
-        id = user.getId();
-        login = user.getLogin();
+        super(user);
         email = user.getEmail();
         name = user.getName();
     }

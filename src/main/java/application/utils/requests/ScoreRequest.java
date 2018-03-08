@@ -15,4 +15,12 @@ public class ScoreRequest {
         this.position = position;
         this.count = count;
     }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public int getCount() {
+        return count;
+    }
 }

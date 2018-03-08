@@ -4,10 +4,13 @@ package application.dao.implementations;
 import application.dao.UserDAO;
 import application.models.User;
 
+import application.models.UserScore;
 import application.models.id.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,7 +30,7 @@ public class UserDAOImplRunTime implements UserDAO {
     public @NotNull Id<User> addUser(@NotNull String login, @NotNull String email,
                                      @NotNull String password, @Nullable String name) {
         final Long id = idCounter.incrementAndGet();
-        users.put(id, new User(id, login, password, email, false, name));
+        users.put(id, new User(id, login, password, email, name));
         return new Id<User>(id);
     }
 
@@ -59,6 +62,23 @@ public class UserDAOImplRunTime implements UserDAO {
     @Override
     public boolean checkPassword(@NotNull Long id, @NotNull String password) {
         return getUserById(id).getPassword().equals(password);
+    }
+
+    @Override
+    public UserScore scoreById(@NotNull Long id) {
+        return new UserScore(id, getUserById(id).getPoints());
+    }
+
+    @Override
+    public UserScore updateScore(@NotNull Long id, @NotNull Long newScore) {
+        User user = getUserById(id);
+        user.setPoints(newScore);
+        return new UserScore(id, newScore);
+    }
+
+    @Override
+    public ArrayList<User> getAll() {
+        return new ArrayList<>(users.values());
     }
 
     @Override
