@@ -15,10 +15,15 @@ public class UserFullInfo extends UserInfo {
     @Nullable
     @JsonProperty("name")
     private String name;
+    
+    @Nullable
+    @JsonProperty("avatar")
+    private String avatar;
 
     public UserFullInfo(User user) {
         super(user);
         email = user.getEmail();
         name = user.getName();
+        avatar = user.getAvatar();
     }
 }
