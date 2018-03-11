@@ -29,11 +29,15 @@ public class User {
     @Nullable
     private long points;
 
-    public User(@NotNull Long id,
+    @Nullable
+    private String avatar;
+
+    public User(@NotNull long id,
                 @NotNull String login,
                 @NotNull String password,
                 @NotNull String email,
-                @Nullable String name) {
+                @Nullable String name,
+                @Nullable String avatar) {
         this.id = new Id<>(id);
         this.login = login;
         this.password = password;
@@ -41,18 +45,11 @@ public class User {
         this.emailChecked = false;
         this.name = name;
         this.points = 0L;
+        this.avatar = avatar;
     }
 
     public long getId() {
         return id.asLong();
-    }
-
-    public long getPoints() {
-        return points;
-    }
-
-    public void setPoints(long points) {
-        this.points = points;
     }
 
     public String getLogin() {
@@ -93,6 +90,22 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public long getPoints() {
+        return points;
+    }
+
+    public void setPoints(long points) {
+        this.points = points;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public static class PointComparator implements Comparator<User> {

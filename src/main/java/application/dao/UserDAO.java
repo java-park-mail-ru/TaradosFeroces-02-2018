@@ -12,11 +12,19 @@ import java.util.ArrayList;
 
 public interface UserDAO {
 
+    enum UpdateInfo {
+        SUCCESS,
+        LOGIN_EXIST,
+        EMAIL_EXIST,
+        WRONG_ID
+    }
+
     @NotNull
     Id<User> addUser(@NotNull String login,
                      @NotNull String email,
                      @NotNull String password,
-                     @Nullable String name);
+                     @Nullable String name,
+                     @Nullable String avatar);
 
     @Nullable
     User getUserById(@NotNull Long id);
@@ -27,17 +35,17 @@ public interface UserDAO {
     @Nullable
     User getUserByEmail(@NotNull String email);
 
-    void updatePassword(@NotNull Long id, @NotNull String password);
-
-    void deleteUser(@NotNull Long id);
-
     boolean checkPassword(@NotNull Long id, @NotNull String password);
 
-    UserScore scoreById(@NotNull Long id);
+    UpdateInfo updateUser(
+        @NotNull long userId,
+        @NotNull String login,
+        @NotNull String email,
+        @Nullable String avatar);
+
 
     UserScore updateScore(@NotNull Long id, @NotNull Long newScore);
 
     ArrayList<User> getAll();
 
-    void clear();
 }

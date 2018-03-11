@@ -6,6 +6,7 @@ import application.models.User;
 import application.utils.requests.ScoreRequest;
 import application.utils.requests.UserSignInRequest;
 import application.utils.requests.UserSignUpRequest;
+import application.utils.requests.UserUpdateRequest;
 import application.utils.responses.Message;
 import application.utils.responses.ScoreData;
 import application.utils.responses.UserFullInfo;
@@ -15,8 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 
 @RestController
@@ -43,7 +43,7 @@ public class SessionController {
                     .body(new Message("User with this login exists"));
         }
 
-        final long id = usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName()).asLong();
+        final long id = usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName(), body.getAvatar()).asLong();
 
         httpSession.setAttribute(USER_ID, id);
 
@@ -124,15 +124,51 @@ public class SessionController {
         final long position = body.getPosition();
         final long count = body.getCount();
 
-        final ArrayList users = usersDataBase.getAll();
-        Collections.sort(users, new User.PointComparator());
+        final List users = usersDataBase.getAll();
+        users.sort(new User.PointComparator());
 
-        ArrayList list = new ArrayList<User>(users.subList((int) position, (int) count));
+        final List list = users.subList((int) position, (int) position + (int) count);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ScoreData(list));
 
+    }
+
+    @PostMapping(path = "/user/update", consumes = JSON, produces = JSON)
+    public ResponseEntity update(@RequestBody UserUpdateRequest body, HttpSession httpSession) {
+
+        final Long id = (Long) httpSession.getAttribute(USER_ID);
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Message("User is not authorized"));
+        }
+
+        final UserDAO.UpdateInfo updateInfo = usersDataBase.updateUser(id, body.getLogin(), body.getEmail(), body.getAvatar());
+
+        switch (updateInfo) {
+            case LOGIN_EXIST:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with this login exists"));
+            case EMAIL_EXIST:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with this email exists"));
+            case WRONG_ID:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("WTF id!"));
+            case SUCCESS:
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new Message("User data successfully updated"));
+            default:
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new Message("If you see this message, call Sanchez!"));
+
+        }
     }
 
 }
