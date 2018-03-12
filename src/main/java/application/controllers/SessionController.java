@@ -15,9 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.ServletContext;
-//import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 
@@ -35,7 +33,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signup", consumes = JSON, produces = JSON)
-    public ResponseEntity<Message> signup(@RequestBody UserSignUpRequest body, ServletContext httpSession) {
+    public ResponseEntity<Message> signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
 
         final String login = body.getLogin();
 
@@ -55,7 +53,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signin", consumes = JSON, produces = JSON)
-    public ResponseEntity<Message> signin(@RequestBody UserSignInRequest body, ServletContext httpSession) {
+    public ResponseEntity<Message> signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
         final String login = body.getLogin();
         final User user = usersDataBase.getUserByLogin(login);
@@ -77,13 +75,12 @@ public class SessionController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                //.header("Set-Cookie", USER_ID + "=" + id.toString())
                 .body(new Message("User has sighed in!"));
     }
 
 
     @GetMapping(path = "/me", produces = JSON)
-    public ResponseEntity whoami(ServletContext httpSession) {
+    public ResponseEntity whoami(HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
         if (id == null) {
@@ -103,7 +100,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/signout", produces = JSON)
-    public ResponseEntity<Message> signout(ServletContext httpSession) {
+    public ResponseEntity<Message> signout(HttpSession httpSession) {
 
         if (httpSession.getAttribute(USER_ID) == null) {
             return ResponseEntity
@@ -115,13 +112,12 @@ public class SessionController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                //.header("Set-Cookie", USER_ID + "=")
                 .body(new Message("User have gone!"));
     }
 
 
     @PostMapping(path = "/score", consumes = JSON, produces = JSON)
-    public ResponseEntity score(@RequestBody ScoreRequest body, ServletContext httpSession) {
+    public ResponseEntity score(@RequestBody ScoreRequest body, HttpSession httpSession) {
 
         final long position = body.getPosition();
         final long count = body.getCount();
@@ -138,7 +134,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/user/update", consumes = JSON, produces = JSON)
-    public ResponseEntity update(@RequestBody UserUpdateRequest body, ServletContext httpSession) {
+    public ResponseEntity update(@RequestBody UserUpdateRequest body, HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
         if (id == null) {
