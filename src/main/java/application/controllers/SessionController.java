@@ -2,11 +2,13 @@ package application.controllers;
 
 
 import application.dao.UserDAO;
+import application.dao.UserDAO.UpdateStatus;
 import application.models.User;
+import application.models.id.Id;
+import application.utils.omgjava.Pair;
 import application.utils.requests.ScoreRequest;
 import application.utils.requests.UserSignInRequest;
 import application.utils.requests.UserSignUpRequest;
-import application.utils.requests.UserUpdateRequest;
 import application.utils.responses.Message;
 import application.utils.responses.ScoreData;
 import application.utils.responses.UserFullInfo;
@@ -15,8 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpSession;
-import java.util.List;
+import java.util.HashMap;
+
 
 
 @RestController
@@ -37,19 +41,33 @@ public class SessionController {
 
         final String login = body.getLogin();
 
-        if (usersDataBase.getUserByLogin(login) != null) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(new Message("User with this login exists"));
+        final Pair<UpdateStatus, Id<User>> updateStatusIdPair =
+                usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName(), body.getAvatar());
+        final UpdateStatus status = updateStatusIdPair.getArg1();
+
+        switch (status) {
+            case SUCCESS:
+                httpSession.setAttribute(USER_ID, updateStatusIdPair.getArg2().asLong());
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(new Message("User has signed up!"));
+
+            case EMAIL_OR_LOGIN_CONFLICT:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with this login/email exists"));
+
+            case WRONG_ID:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with this id does not exist"));
+
+            default:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("if U C this, so, better call Soul!"));
+
         }
-
-        final long id = usersDataBase.addUser(login, body.getEmail(), body.getPassword(), body.getName(), body.getAvatar()).asLong();
-
-        httpSession.setAttribute(USER_ID, id);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new Message("User has signed up!"));
     }
 
     @PostMapping(path = "/signin", consumes = JSON, produces = JSON)
@@ -122,37 +140,30 @@ public class SessionController {
         final long position = body.getPosition();
         final long count = body.getCount();
 
-        final List users = usersDataBase.getAll();
-        users.sort(new User.PointComparator());
-
-        final List list = users.subList((int) position, (int) position + (int) count);
+        ScoreData scoreData = usersDataBase.getTopUsers(count, position);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(new ScoreData(list));
-
+                .body(scoreData);
     }
 
     @PostMapping(path = "/user/update", consumes = JSON, produces = JSON)
-    public ResponseEntity update(@RequestBody UserUpdateRequest body, HttpSession httpSession) {
+    public ResponseEntity update(@RequestBody HashMap<String, Object> body, HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
+
         if (id == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new Message("User is not authorized"));
         }
 
-        final UserDAO.UpdateInfo updateInfo = usersDataBase.updateUser(id, body.getLogin(), body.getEmail(), body.getAvatar());
+        final UpdateStatus updateStatus = usersDataBase.updateUser(id, body);
 
-        switch (updateInfo) {
-            case LOGIN_EXIST:
+        switch (updateStatus) {
+            case EMAIL_OR_LOGIN_CONFLICT:
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .body(new Message("User with this login exists"));
-            case EMAIL_EXIST:
-                return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .body(new Message("User with this email exists"));
+                        .body(new Message("User with this login/email exists"));
             case WRONG_ID:
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
@@ -163,7 +174,7 @@ public class SessionController {
                         .body(new Message("User data successfully updated"));
             default:
                 return ResponseEntity
-                        .status(HttpStatus.OK)
+                        .status(500)
                         .body(new Message("If you see this message, call Sanchez!"));
 
         }

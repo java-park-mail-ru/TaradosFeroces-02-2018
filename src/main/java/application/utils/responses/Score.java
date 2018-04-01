@@ -7,8 +7,8 @@ public class Score {
     @JsonProperty("points")
     private final long points;
 
-    public Score(Score score) {
-        this.points = score.getPoints();
+    public Score(long points) {
+        this.points = points;
     }
 
     public long getPoints() {

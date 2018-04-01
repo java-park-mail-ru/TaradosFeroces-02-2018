@@ -4,13 +4,16 @@ sudo: required
 jdk:
   - oraclejdk8
 
+services:
+  - postgresql
+
+before_install:
+  - docker build -t deadlinez -f Dockerfile ./
+
 branches:
   only:
   - develop
   - sandbox
-
-before_install:
-  - echo "start building"
 
 deploy:
   provider: heroku
@@ -23,5 +26,4 @@ deploy:
   skip_cleanup: true
 
 install:
-  - mvn checkstyle:check
-  - mvn test
+  - docker run -p 8080:8080 --name deadlinez deadlinez

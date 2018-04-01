@@ -21,7 +21,7 @@ public class UserFullInfo extends UserInfo {
     private String avatar;
 
     public UserFullInfo(User user) {
-        super(user);
+        super(user.getLogin());
         email = user.getEmail();
         name = user.getName();
         avatar = user.getAvatar();
