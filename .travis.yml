@@ -1,16 +1,17 @@
-sudo: true
-dist: trusty
-
-branches:
-  only:
-  - develop
-  - sandbox
-  - docker
+sudo: required
 
 services:
   - docker
 
+#branches:
+#  only:
+#  - develop
+#  - sandbox
+#  - docker
+
 before_install:
+      - sudo apt-get update
+      - sudo apt-get install docker-engine
       - docker build -t deadlinez -f Dockerfile ./
       - docker images
       - docker tag deadlinez $DOCKER_USERNAME/deadlinez
