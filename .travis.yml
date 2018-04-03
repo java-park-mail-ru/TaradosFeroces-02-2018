@@ -17,7 +17,7 @@ before_install:
       - sudo apt-get update
       - sudo apt-get install docker-engine
       - sudo docker pull ubuntu
-      - docker build -t deadlinez -f Dockerfile ./
+      - docker build -t deadlinez ./
       - docker images
       - docker tag deadlinez $DOCKER_USERNAME/deadlinez
       - docker push $DOCKER_USERNAME/deadlinez
