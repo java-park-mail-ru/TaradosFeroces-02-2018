@@ -5,10 +5,12 @@ jdk:
   - oraclejdk8
 
 services:
+  - docker
   - postgresql
 
 before_install:
   - docker build -t deadlinez -f Dockerfile ./
+  - docker ps -a
 
 branches:
   only:
@@ -23,7 +25,7 @@ deploy:
   app: deadlinez
   on:
     repo: Alex-Kuz/TaradosFeroces-02-2018
-    branch: sandbox
+    branch: docker
   skip_cleanup: true
 
 install:
