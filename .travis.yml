@@ -14,6 +14,7 @@ branches:
   only:
   - develop
   - sandbox
+  - docker
 
 deploy:
   provider: heroku
