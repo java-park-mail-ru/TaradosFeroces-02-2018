@@ -10,16 +10,14 @@ branches:
 services:
   - docker
 
-jobs:
-  include:
-    - stage: build docker image
-      script:
+before_install:
       - docker build -t deadlinez -f Dockerfile ./
       - docker images
       - docker tag deadlinez $DOCKER_USERNAME/deadlinez
       - docker push $DOCKER_USERNAME/deadlinez
-    - stage: test
-      script: docker run --rm -p 8080:8080 $DOCKER_USERNAME/deadlinez
+
+install:
+      - docker run --rm -p 8080:8080 $DOCKER_USERNAME/deadlinez
 
 
 deploy:
