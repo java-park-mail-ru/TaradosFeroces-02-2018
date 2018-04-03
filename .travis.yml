@@ -1,12 +1,5 @@
-language: java
-sudo: required
-
-jdk:
-  - oraclejdk8
-
-services:
-  - postgresql
-  - docker
+sudo: true
+dist: trusty
 
 branches:
   only:
@@ -33,5 +26,5 @@ deploy:
   app: deadlinez
   on:
     repo: Alex-Kuz/TaradosFeroces-02-2018
-    branch: sandbox
+    branch: docker
   skip_cleanup: true
