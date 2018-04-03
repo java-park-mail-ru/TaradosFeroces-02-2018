@@ -6,10 +6,10 @@ import application.models.UserScore;
 import application.models.id.Id;
 import application.utils.omgjava.Pair;
 
-import application.utils.responses.ScoreData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -17,11 +17,10 @@ public interface UserDAO {
 
     enum UpdateStatus {
         SUCCESS,
-        //LOGIN_EXIST,
-        //EMAIL_EXIST,
         EMAIL_OR_LOGIN_CONFLICT,
         WRONG_ID
     }
+
 
     @NotNull
     Pair<UpdateStatus, Id<User>> addUser(@NotNull String login,
@@ -41,10 +40,9 @@ public interface UserDAO {
 
     boolean checkPassword(@NotNull Long id, @NotNull String password);
 
-    UpdateStatus updateUser(@NotNull long userId, @NotNull Map<String, Object> data);
-
+    UpdateStatus updateUser(@NotNull long userId, @NotNull Map<String, ? extends Object> data);
 
     UserScore updateScore(@NotNull Long id, @NotNull Long newScore);
 
-    ScoreData getTopUsers(long topCount, long start);
+    List<Map<String, Object>> getTopUsers(long topCount, long start);
 }

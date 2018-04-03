@@ -2,8 +2,8 @@ package application.utils.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 
 
 public class UserUpdateRequest {
@@ -11,28 +11,20 @@ public class UserUpdateRequest {
     private final String login;
 
     @NotNull
-    private final String email;
+    private final Map<String, String> data;
 
-    @Nullable
-    private final String avatar;
 
     public UserUpdateRequest(@JsonProperty("login") @NotNull String login,
-                             @JsonProperty("email") @NotNull String email,
-                             @JsonProperty("avatar") @Nullable String avatar) {
+                             @JsonProperty("data") @NotNull Map<String, String> data) {
         this.login = login;
-        this.email = email;
-        this.avatar = avatar;
+        this.data = data;
     }
 
     public String getLogin() {
         return login;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAvatar() {
-        return avatar;
+    public Map<String, String> getData() {
+        return data;
     }
 }

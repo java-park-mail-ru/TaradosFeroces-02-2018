@@ -10,6 +10,14 @@ import java.util.Comparator;
 
 public class User {
 
+    public class Fields {
+        public static final String PASSWORD = "password";
+        public static final String EMAIL = "email";
+        public static final String LOGIN = "login";
+        public static final String NAME = "name";
+        public static final String AVATAR = "avatar";
+    }
+
     @NotNull
     private final Id<User> id;
 
@@ -50,6 +58,10 @@ public class User {
 
     public long getId() {
         return id.asLong();
+    }
+
+    public Id<User> getUserId() {
+        return id;
     }
 
     public String getLogin() {

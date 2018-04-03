@@ -9,21 +9,21 @@ import org.jetbrains.annotations.Nullable;
 public class UserFullInfo extends UserInfo {
 
     @NotNull
-    @JsonProperty("email")
-    private String email;
-
-    @Nullable
     @JsonProperty("name")
     private String name;
+
+    @Nullable
+    @JsonProperty("points")
+    private long points;
     
     @Nullable
     @JsonProperty("avatar")
     private String avatar;
 
     public UserFullInfo(User user) {
-        super(user.getLogin());
-        email = user.getEmail();
+        super(user);
         name = user.getName();
         avatar = user.getAvatar();
+        points = user.getPoints();
     }
 }

@@ -7,11 +7,6 @@ import application.models.UserScore;
 import application.models.id.Id;
 import application.utils.omgjava.Pair;
 
-
-import application.utils.responses.Score;
-import application.utils.responses.ScoreData;
-import application.utils.responses.ScoreView;
-import application.utils.responses.UserInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -111,7 +106,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public UpdateStatus updateUser(@NotNull long userId, @NotNull Map<String, Object> data) {
+    public UpdateStatus updateUser(@NotNull long userId, @NotNull Map<String, ? extends Object>  data) {
         try {
             String query = "UPDATE users SET ";
 
@@ -153,20 +148,12 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public ScoreData getTopUsers(long topCount, long start) {
+    public List<Map<String, Object>> getTopUsers(long topCount, long start) {
         try {
-            final String query = "SELECT points, login FROM users ORDER BY points DESC LIMIT ? OFFSET ?;";
+            final String query =
+                    "SELECT points, login, email FROM users ORDER BY points DESC LIMIT ? OFFSET ?;";
             List<Map<String, Object>> top = template.queryForList(query, topCount, start);
-
-            ScoreData scoreData = new ScoreData();
-            for (Map<String, Object> map: top) {
-                scoreData.addScoreView(new ScoreView(
-                        new Score((Long) map.get("points")),
-                        new UserInfo((String) map.get("login"))
-                ));
-            }
-
-            return scoreData;
+            return top;
 
         } catch (DataAccessException e) {
             LOGGER.error("error in getTopUsers: " + e.getMessage());
