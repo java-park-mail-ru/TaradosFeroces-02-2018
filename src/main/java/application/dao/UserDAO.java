@@ -18,7 +18,8 @@ public interface UserDAO {
     enum UpdateStatus {
         SUCCESS,
         EMAIL_OR_LOGIN_CONFLICT,
-        WRONG_ID
+        WRONG_ID,
+        DB_ERROR
     }
 
 
@@ -45,4 +46,6 @@ public interface UserDAO {
     UserScore updateScore(@NotNull Long id, @NotNull Long newScore);
 
     List<Map<String, Object>> getTopUsers(long topCount, long start);
+
+    void clearTable();
 }

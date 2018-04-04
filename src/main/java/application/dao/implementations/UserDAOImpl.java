@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -50,16 +51,25 @@ public class UserDAOImpl implements UserDAO {
                                                          @NotNull String password,
                                                          @Nullable String name,
                                                          @Nullable String avatar) {
-        final String query = "INSERT INTO users(login, password, email, name, avatar) VALUES(?,?,?,?,?) RETURNING id";
+        final String query = "INSERT INTO users(login, password, email, fullname, avatar) VALUES(?,?,?,?,?) RETURNING id";
 
         try {
+            if (name == null) {
+                name = "";
+            }
+            if (avatar == null) {
+                avatar = "";
+            }
             final Id<User> id =
                     new Id<>(template.queryForObject(query, Long.class, login, password, email, name, avatar));
 
             return new Pair<>(UpdateStatus.SUCCESS, id);
         } catch (DuplicateKeyException ex) {
-            System.out.println(ex.toString());
+            System.out.println("\n\n\n###USER_DAO: " + ex.toString() + "\n\n\n");
             return new Pair<>(UpdateStatus.EMAIL_OR_LOGIN_CONFLICT, null);
+        } catch (BadSqlGrammarException ex) {
+            System.out.println("\n\n\n###USER_DAO: " + ex.toString() + "\n\n\n");
+            return new Pair<>(UpdateStatus.DB_ERROR, null);
         }
     }
 
@@ -158,6 +168,16 @@ public class UserDAOImpl implements UserDAO {
         } catch (DataAccessException e) {
             LOGGER.error("error in getTopUsers: " + e.getMessage());
             return null;
+        }
+    }
+
+    @Override
+    public void clearTable() {
+        try {
+            template.execute("TRUNCATE TABLE users CASCADE");
+
+        } catch (DataAccessException e) {
+            LOGGER.error("error in clearTable: " + e.getMessage());
         }
     }
 

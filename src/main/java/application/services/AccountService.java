@@ -206,4 +206,7 @@ public class AccountService {
         return scoreData;
     }
 
+    public void deleteAllUsers() {
+        userDB.clearTable();
+    }
 }

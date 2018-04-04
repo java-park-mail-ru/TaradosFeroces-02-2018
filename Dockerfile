@@ -10,20 +10,24 @@ RUN apt-get -y update
 # Установка postgresql
 #
 ENV PGVER 9.5
-RUN apt-get install -y postgresql-$PGVER tree maven openjdk-8-jdk-headless
+RUN apt-get install -y postgresql-$PGVER tree maven openjdk-8-jdk-headless build-essential
 
 
 USER postgres
 
 ARG db_user="tf_alex"
 ARG db_password="tarados"
+
 ARG db_name="deadlinez_db"
+#ARG db_test_name="test_deadlinez_db"
 
 
 RUN /etc/init.d/postgresql start && \
     psql --command "CREATE USER ${db_user} WITH SUPERUSER PASSWORD '${db_password}';" && \
     createdb -O "${db_user}" ${db_name} && \
+    #createdb -O "${db_user}" ${db_test_name} && \
     /etc/init.d/postgresql stop
+
 
 RUN echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf
 RUN echo "listen_addresses='localhost'" >> /etc/postgresql/$PGVER/main/postgresql.conf
@@ -39,7 +43,6 @@ VOLUME  [ "/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql" ]
 
 # Back to the root user
 USER root
-
 
 # Копируем исходный код в Docker-контейнер
 ENV WORK /opt/deadlinez
@@ -57,11 +60,8 @@ ENV DB_USER ${db_user}
 ENV DB_PASS ${db_password}
 ENV DB_NAME ${db_name}
 
-RUN mvn clean package
+#RUN make install
 
 # Запускаем PostgreSQL и сервер
-CMD service postgresql start && \
-    java -Xmx500M -jar $WORK/server/target/deadlinez-1.0.0.jar
-    #    --database=jdbc:postgresql://localhost:5432/${DB_NAME} \
-    #    --username=${DB_USER} \
-    #    --password=${BD_PASSWORD}
+ENTRYPOINT exec make
+CMD ["deadlinez"]
