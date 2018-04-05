@@ -45,11 +45,6 @@ public class UserControllerTest {
         return gson.toJson(data);
     }
 
-    private Map<String, Object> fromJSON(String jsonString){
-        return null;
-    }
-
-
     private Map<String, Object> addProperty(Map<String, Object> map,
                                             String propName,
                                             Object value) {
