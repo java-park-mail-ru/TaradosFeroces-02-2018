@@ -45,6 +45,10 @@ public class UserControllerTest {
         return gson.toJson(data);
     }
 
+    private Map<String, Object> fromJSON(String jsonString){
+        return null;
+    }
+
 
     private Map<String, Object> addProperty(Map<String, Object> map,
                                             String propName,
@@ -133,7 +137,7 @@ public class UserControllerTest {
     public void conflictSignup() throws Exception {
 
         successfulySignup();
-        
+
         mock.perform(
                 post("/api/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,6 +152,25 @@ public class UserControllerTest {
         ).andExpect(status().isConflict());
     }
 
+
+    @Test
+    public void whoami() throws Exception {
+
+        successfulySignup();
+
+        mock.perform(
+                post("/api/user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJSON(makeUser("email_conflict", "a@java.ru", "1234", null, null)))
+        ).andExpect(status().isConflict());
+
+        mock.perform(
+                post("/api/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJSON(makeUser("alex_kuz", "login_conflict@Mail.ru",
+                                "145", "Alexander Kuzyakin", "SUPERAVATARINBASE64CODE")))
+        ).andExpect(status().isConflict());
+    }
 
 
     @After

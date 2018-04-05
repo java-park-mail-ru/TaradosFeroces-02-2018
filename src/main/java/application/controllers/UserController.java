@@ -106,7 +106,7 @@ public class UserController {
     }
 
 
-    @GetMapping(path = "/me", produces = JSON)
+    @GetMapping(path = "/user", produces = JSON)
     public ResponseEntity whoami(HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);

@@ -145,14 +145,14 @@ public class UserDAOImpl implements UserDAO {
                     query += ", ";
                     smth = true;
                 }
-                query += "fullname = \'" + data.get("name").toString();
+                query += "fullname = \'" + data.get("name").toString()+ "\'";
             }
             if (data.containsKey("avatar")) {
                 if (smth) {
                     query += ", ";
                     smth = true;
                 }
-                query += "avatar = \'" + data.get("avatar").toString();
+                query += "avatar = \'" + data.get("avatar").toString()+ "\'";
             }
 
             if (!smth) {
