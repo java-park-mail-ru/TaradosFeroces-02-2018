@@ -13,7 +13,7 @@ before_install:
       - docker build -t deadlinez ./
       - docker images
 
-install:
+script:
       - docker run --rm -p 8080:8080 deadlinez tests
 
 

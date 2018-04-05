@@ -64,4 +64,4 @@ ENV DB_NAME ${db_name}
 
 # Запускаем PostgreSQL и сервер
 ENTRYPOINT ["make"]
-CMD ["deadlinez"]
+CMD ["deadlinez-in-docker"]
