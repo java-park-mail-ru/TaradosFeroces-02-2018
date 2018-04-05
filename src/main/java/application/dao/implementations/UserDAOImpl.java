@@ -155,6 +155,10 @@ public class UserDAOImpl implements UserDAO {
                 query += "avatar = \'" + data.get("avatar").toString();
             }
 
+            if (!smth) {
+                return UpdateStatus.SUCCESS;
+            }
+
             query +=  " WHERE id = ?;";
             template.update(query, userId);
 

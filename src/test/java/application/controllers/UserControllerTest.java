@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -113,13 +114,41 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signup() throws Exception {
+    public void successfulySignup() throws Exception {
         mock.perform(
                 post("/api/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJSON(makeUser("superlogin", "a@java.ru", "1234", null, null)))
         ).andExpect(status().is2xxSuccessful());
+
+        mock.perform(
+                post("/api/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJSON(makeUser("alex_kuz", "ad.kuznetsov.b3@cpp.ru",
+                                "145", "Alexander Kuzyakin", "SUPERAVAINBASE64CODE")))
+        ).andExpect(status().is2xxSuccessful());
     }
+
+    @Test
+    public void conflictSignup() throws Exception {
+
+        successfulySignup();
+        
+        mock.perform(
+                post("/api/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJSON(makeUser("email_conflict", "a@java.ru", "1234", null, null)))
+        ).andExpect(status().isConflict());
+
+        mock.perform(
+                post("/api/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJSON(makeUser("alex_kuz", "login_conflict@Mail.ru",
+                                "145", "Alexander Kuzyakin", "SUPERAVATARINBASE64CODE")))
+        ).andExpect(status().isConflict());
+    }
+
+
 
     @After
     public void clear() {
