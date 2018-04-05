@@ -145,7 +145,7 @@ public class UserController {
     }
 
 
-    @PostMapping(path = "/leadertable", consumes = JSON, produces = JSON)
+    @PostMapping(path = "/leaderboard", consumes = JSON, produces = JSON)
     public ResponseEntity score(@RequestBody ScoreRequest body, HttpSession httpSession) {
 
         final long position = body.getPosition();
