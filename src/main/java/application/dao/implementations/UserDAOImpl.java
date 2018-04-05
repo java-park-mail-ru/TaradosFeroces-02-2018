@@ -120,19 +120,34 @@ public class UserDAOImpl implements UserDAO {
         try {
             String query = "UPDATE users SET ";
 
+            boolean smth = false;
+
             if (data.containsKey("login")) {
                 query += "login = \'" + data.get("login").toString() + "\'";
+                smth = true;
             }
             if (data.containsKey("email")) {
-                query += ", email = \'" + data.get("email").toString() + "\'";
+                if (smth) {
+                    query += ", ";
+                    smth = true;
+                }
+                query += "email = \'" + data.get("email").toString() + "\'";
             }
             if (data.containsKey("password")) {
-                query += ", password = \'" + data.get("password").toString() + "\'";
+                if (smth) {
+                    query += ", ";
+                    smth = true;
+                }
+                query += "password = \'" + data.get("password").toString() + "\'";
             }
             if (data.containsKey("name")) {
-                query += ", fullname = \'" + data.get("name").toString();
+                if (smth) {
+                    query += ", ";
+                    smth = true;
+                }
+                query += "fullname = \'" + data.get("name").toString();
             }
-            query +=  " WHERE id = ?";
+            query +=  " WHERE id = ?;";
             template.update(query, userId);
 
             return UpdateStatus.SUCCESS;
