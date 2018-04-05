@@ -147,6 +147,14 @@ public class UserDAOImpl implements UserDAO {
                 }
                 query += "fullname = \'" + data.get("name").toString();
             }
+            if (data.containsKey("avatar")) {
+                if (smth) {
+                    query += ", ";
+                    smth = true;
+                }
+                query += "avatar = \'" + data.get("avatar").toString();
+            }
+
             query +=  " WHERE id = ?;";
             template.update(query, userId);
 
