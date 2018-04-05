@@ -109,6 +109,7 @@ public class UserDAOImpl implements UserDAO {
         try {
             String originPass = template.queryForObject(query,
                     (res, num) -> res.getString("password"), id);
+
             return originPass.equals(password);
         } catch (EmptyResultDataAccessException e) {
             return false;

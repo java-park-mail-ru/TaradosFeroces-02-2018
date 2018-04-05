@@ -92,10 +92,12 @@ public class AccountService {
     }
 
     public Pair<AuthCheckStatus, Id<User>> checkSignin(@NotNull String login, @NotNull String password) {
-        final User user = userDB.getUserByEmail(login);
+        final User user = userDB.getUserByLogin(login);
+
         if (user == null) {
             return new Pair<>(AuthCheckStatus.USER_NOT_EXISTS, null);
         }
+
         return encoder.matches(password, user.getPassword())
                 ? new Pair<>(AuthCheckStatus.SUCCESS, user.getUserId())
                 : new Pair<>(AuthCheckStatus.WRONG_PASSWORD, null);
