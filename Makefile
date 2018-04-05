@@ -12,3 +12,6 @@ run:
 
 tests:
 	service postgresql start && mvn test -B
+
+checkstyle-test:
+	mvn checkstyle:check
