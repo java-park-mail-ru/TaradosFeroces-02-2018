@@ -40,7 +40,7 @@ public class UserDAOImpl implements UserDAO {
                     res.getString("login"),
                     res.getString("password"),
                     res.getString("email"),
-                    res.getString("name"),
+                    res.getString("fullname"),
                     res.getString("avatar")
             );
 
@@ -130,7 +130,7 @@ public class UserDAOImpl implements UserDAO {
                 query += ", password = \'" + data.get("password").toString() + "\'";
             }
             if (data.containsKey("name")) {
-                query += ", name = \'" + data.get("name").toString();
+                query += ", fullname = \'" + data.get("name").toString();
             }
             query +=  " WHERE id = ?";
             template.update(query, userId);

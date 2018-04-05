@@ -63,5 +63,5 @@ ENV DB_NAME ${db_name}
 #RUN make install
 
 # Запускаем PostgreSQL и сервер
-ENTRYPOINT exec make
+ENTRYPOINT ["make"]
 CMD ["deadlinez"]
