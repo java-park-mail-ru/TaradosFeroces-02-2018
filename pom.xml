@@ -9,7 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>deadlines</name>
-	<description>Deadlines backend server</description>
+	<description>Deadlines application server</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
