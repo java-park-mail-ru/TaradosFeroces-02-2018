@@ -1,5 +1,8 @@
 sudo: required
-lang:
+
+language: java
+jdk:
+  - oraclejdk9
 
 services:
   - docker
@@ -11,12 +14,6 @@ services:
 #  - docker
 
 before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install oracle-9-installer
-    - remove_dir_from_path $JAVA_HOME/bin
-    - export JAVA_HOME=/usr/lib/jvm/java-9-oracle
-    - export PATH=$JAVA_HOME/bin:$PATH
-    - java -version
     - docker build -t deadlinez ./
     - docker images
 
