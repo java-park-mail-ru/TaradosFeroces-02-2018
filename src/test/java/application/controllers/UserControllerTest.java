@@ -33,6 +33,16 @@ import java.util.TreeMap;
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 public class UserControllerTest {
 
+    private static final String API_PATH = "/api";
+
+    private class ApiUrls {
+        private static final String SIGNUP = API_PATH + "/signup";
+        private static final String SIGNIN = API_PATH + "/signin";
+        private static final String LOGOUT = API_PATH + "/signout";
+        
+
+    }
+
     private String toJSON(Map<String, Object> data) {
         Gson gson = new Gson();
         return gson.toJson(data);
