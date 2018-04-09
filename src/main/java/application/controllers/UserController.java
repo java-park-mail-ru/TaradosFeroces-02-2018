@@ -25,7 +25,8 @@ import java.util.Map;
 
 
 @RestController
-@CrossOrigin(origins = {"http://tf-sand-server.herokuapp.com", "http://localhost:8080"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://tf-sand-server.herokuapp.com", "http://localhost:8080"},
+        allowCredentials = "true")
 @RequestMapping("/api")
 public class UserController {
 
