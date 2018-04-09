@@ -32,7 +32,7 @@ public class UserController {
     private static final String JSON = MediaType.APPLICATION_JSON_UTF8_VALUE; // "application/json;charset=UTF-8"
     private static final String USER_ID = "Deadlinez_user_id";
 
-    private static final Logger logger = LoggerFactory.getLogger("application");
+    private static final Logger LOGGER = LoggerFactory.getLogger("application");
 
     private AccountService accountService;
 
@@ -174,8 +174,8 @@ public class UserController {
     public ResponseEntity isAuthorized(HttpSession httpSession) {
         final Long id = (Long) httpSession.getAttribute(USER_ID);
 
-        logger.info("httpSession = [" + httpSession + "]");
-        logger.info("         id = [" + id + "]");
+        LOGGER.info("httpSession = [" + httpSession + "]");
+        LOGGER.info("         id = [" + id + "]");
 
         Map<String, Boolean> map = new HashMap<>();
         map.put("is_authorized", id != null);
