@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,15 +34,28 @@ import java.util.TreeMap;
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 public class UserControllerTest {
 
-    private static final String API_PATH = "/api";
+    private class APIUrls {
+        private static final String API_PATH = "/api";
 
-    private class ApiUrls {
         private static final String SIGNUP = API_PATH + "/signup";
         private static final String SIGNIN = API_PATH + "/signin";
         private static final String LOGOUT = API_PATH + "/signout";
 
+        private static final String LEADERBOARD = API_PATH + "/leaderboard";
+
+        public static final String ISAUTH = API_PATH + "/isauthorized";
+
+        private static final String USER = API_PATH + "/user";
+        private static final String USER_UPDATE = USER + "/update";
 
     }
+
+
+    @Autowired
+    AccountService accountService;
+
+    @Autowired
+    MockMvc mock;
 
     private String toJSON(Map<String, Object> data) {
         Gson gson = new Gson();
@@ -57,12 +71,8 @@ public class UserControllerTest {
         return map;
     }
 
-    private Map<String, Object> makeUser(String login,
-                                         String email,
-                                         String pass,
-                                         String name,
-                                         String avatar) {
-
+    private Map<String, Object> makeUser(String login, String email, String pass,
+                                         String name, String avatar) {
 
         Map<String, Object> data = new TreeMap<>();
 
@@ -75,19 +85,11 @@ public class UserControllerTest {
         return data;
     }
 
-
-    @Autowired
-    AccountService accountService;
-
-    @Autowired
-    MockMvc mock;
-
-
+    
     @Test
     public void gsonForJSON()  {
 
         Map<String, Object> data = new TreeMap<>();
-
 
         data.put("int_value", 42);
         data.put("str_value", "Better call Soul!");
@@ -117,14 +119,15 @@ public class UserControllerTest {
 
     @Test
     public void successfulySignup() throws Exception {
+
         mock.perform(
-                post("/api/signup")
+                post(APIUrls.SIGNUP)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJSON(makeUser("superlogin", "a@java.ru", "1234", null, null)))
         ).andExpect(status().is2xxSuccessful());
 
         mock.perform(
-                post("/api/signup")
+                post(APIUrls.SIGNUP)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJSON(makeUser("alex_kuz", "ad.kuznetsov.b3@cpp.ru",
                                 "145", "Alexander Kuzyakin", "SUPERAVAINBASE64CODE")))
@@ -137,37 +140,21 @@ public class UserControllerTest {
         successfulySignup();
 
         mock.perform(
-                post("/api/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("email_conflict", "a@java.ru", "1234", null, null)))
-        ).andExpect(status().isConflict());
-
-        mock.perform(
-                post("/api/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("alex_kuz", "login_conflict@Mail.ru",
-                                "145", "Alexander Kuzyakin", "SUPERAVATARINBASE64CODE")))
+                get(APIUrls.SIGNUP)
         ).andExpect(status().isConflict());
     }
+
 
     /*
     @Test
     public void whoami() throws Exception {
-
         successfulySignup();
 
         mock.perform(
-                post("/api/user")
+                post(APIUrls.USER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJSON(makeUser("email_conflict", "a@java.ru", "1234", null, null)))
-        ).andExpect(status().is(HttpStatus.CONFLICT));
-
-        mock.perform(
-                post("/api/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("alex_kuz", "login_conflict@Mail.ru",
-                                "145", "Alexander Kuzyakin", "SUPERAVATARINBASE64CODE")))
-        ).andExpect(status().isConflict());
+        ).andExpect(status().is2xxSuccessful());
     }
     */
 
