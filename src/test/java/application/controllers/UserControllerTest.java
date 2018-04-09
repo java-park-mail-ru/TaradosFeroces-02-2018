@@ -39,7 +39,7 @@ public class UserControllerTest {
         private static final String SIGNUP = API_PATH + "/signup";
         private static final String SIGNIN = API_PATH + "/signin";
         private static final String LOGOUT = API_PATH + "/signout";
-        
+
 
     }
 

@@ -28,5 +28,5 @@ deploy:
   app: deadlinez
   on:
     repo: Alex-Kuz/TaradosFeroces-02-2018
-    branch: docker
+    branch: test
   skip_cleanup: true
