@@ -134,6 +134,7 @@ public class UserControllerTest {
         ).andExpect(status().is2xxSuccessful());
     }
 
+    /*
     @Test
     public void conflictSignup() throws Exception {
 
@@ -143,7 +144,7 @@ public class UserControllerTest {
                 get(APIUrls.SIGNUP)
         ).andExpect(status().isConflict());
     }
-
+    */
 
     /*
     @Test
