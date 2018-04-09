@@ -26,6 +26,7 @@ import java.util.Map;
 @CrossOrigin//(origins = {"http://tf-sand-server.herokuapp.com/", "http://localhost:8080/"})
 @RequestMapping("/api")
 public class UserController {
+
     private static final String JSON = MediaType.APPLICATION_JSON_UTF8_VALUE; // "application/json;charset=UTF-8"
     private static final String USER_ID = "Deadlinez_user_id";
 
