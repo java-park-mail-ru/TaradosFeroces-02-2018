@@ -174,8 +174,7 @@ public class UserController {
     public ResponseEntity isAuthorized(HttpSession httpSession) {
         final Long id = (Long) httpSession.getAttribute(USER_ID);
 
-        LOGGER.info("httpSession = [" + httpSession + "]");
-        LOGGER.info("         id = [" + id + "]");
+        LOGGER.info("/isauthorized : id = [" + id + "]");
 
         Map<String, Boolean> map = new HashMap<>();
         map.put("is_authorized", id != null);
