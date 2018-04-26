@@ -10,8 +10,9 @@ deadlinez-in-docker:
 run:
 	java -Xmx500M -jar ./target/deadlinez-1.0.0.jar
 
-tests:
-	service postgresql start && mvn test -B
 
 checkstyle-test:
 	mvn checkstyle:check
+
+tests:
+	service postgresql start && mvn test -B
