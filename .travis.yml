@@ -4,8 +4,11 @@ language: java
 jdk:
   - oraclejdk9
 
+addons:
+  postgresql: "9.6"
+
 services:
-  - docker
+  - postgresql
 
 #branches:
 #  only:
@@ -14,11 +17,12 @@ services:
 #  - docker
 
 before_install:
-    - docker build -t deadlinez ./
-    - docker images
+    - psql -h 127.0.0.1 -c "create user $DEADLINEZ_PG_USER with password '$DEADLINEZ_PG_PASSWORD';" -U postgres
+    - psql -h 127.0.0.1 -c "create database $DEADLINEZ_PG_DB;" -U postgres
+    - psql -h 127.0.0.1 -c "grant all on database $DEADLINEZ_PG_DB to $DEADLINEZ_PG_USER;" -U postgres
 
 script:
-    - docker run --rm -p 8080:8080 deadlinez tests
+    - mvn test -B
 
 
 deploy:
@@ -28,5 +32,5 @@ deploy:
   app: deadlinez
   on:
     repo: Alex-Kuz/TaradosFeroces-02-2018
-    branch: docker
+    branch: develop
   skip_cleanup: true
