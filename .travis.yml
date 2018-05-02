@@ -17,6 +17,9 @@ services:
 #  - docker
 
 before_install:
+    - export DEADLINEZ_PG_USER=tarados
+    - export DEADLINEZ_PG_PASSWORD="dh89cw9Gj9f_3jfr"
+    - export DEADLINEZ_PG_USER=tarados_db
     - psql -h 127.0.0.1 -c "create user $DEADLINEZ_PG_USER with password '$DEADLINEZ_PG_PASSWORD';" -U postgres
     - psql -h 127.0.0.1 -c "create database $DEADLINEZ_PG_DB;" -U postgres
     - psql -h 127.0.0.1 -c "grant all on database $DEADLINEZ_PG_DB to $DEADLINEZ_PG_USER;" -U postgres
