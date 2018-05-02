@@ -1,0 +1,36 @@
+sudo: required
+
+language: java
+jdk:
+  - oraclejdk9
+
+addons:
+  postgresql: "9.6"
+
+services:
+  - postgresql
+
+#branches:
+#  only:
+#  - develop
+#  - sandbox
+#  - docker
+
+before_install:
+    - psql -h 127.0.0.1 -c "create user $DEADLINEZ_PG_USER with password '$DEADLINEZ_PG_PASSWORD';" -U postgres
+    - psql -h 127.0.0.1 -c "create database $DEADLINEZ_PG_DB;" -U postgres
+    - psql -h 127.0.0.1 -c "grant all on database $DEADLINEZ_PG_DB to $DEADLINEZ_PG_USER;" -U postgres
+
+script:
+    - mvn test -B
+
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: $HEROKU_API_KEY
+  app: deadlinez
+  on:
+    repo: Alex-Kuz/TaradosFeroces-02-2018
+    branch: new-way
+  skip_cleanup: true
