@@ -6,6 +6,7 @@ import application.models.UserScore;
 import application.models.id.Id;
 import application.utils.omgjava.Pair;
 
+import application.utils.responses.UserView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +39,9 @@ public interface UserDAO {
 
     @Nullable
     User getUserByEmail(@NotNull String email);
+
+    @Nullable
+    List<UserView> selectUsersByLoginPrefix(@Nullable String prefix);
 
     boolean checkPassword(@NotNull Long id, @NotNull String password);
 

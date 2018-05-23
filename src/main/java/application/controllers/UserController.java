@@ -6,28 +6,31 @@ import application.models.id.Id;
 import application.services.AccountService;
 import application.utils.omgjava.Pair;
 import application.utils.requests.ScoreRequest;
+import application.utils.requests.SelectUsersByLoginPrefix;
 import application.utils.requests.UserSignInRequest;
 import application.utils.requests.UserSignUpRequest;
 import application.utils.responses.Message;
 import application.utils.responses.ScoreData;
 import application.utils.responses.UserFullInfo;
 
+import application.utils.responses.UserView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 
 @RestController
-@CrossOrigin//(origins = {"http://tf-sand-server.herokuapp.com/", "http://localhost:8080/"})
+@CrossOrigin(origins = "*", allowCredentials = "true")
 @RequestMapping("/api")
-public class UserController {
-    private static final String JSON = MediaType.APPLICATION_JSON_UTF8_VALUE; // "application/json;charset=UTF-8"
-    private static final String USER_ID = "Deadlinez_user_id";
+public class UserController extends BaseController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     private AccountService accountService;
 
@@ -39,6 +42,8 @@ public class UserController {
     public ResponseEntity<Message> signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
 
         final String login = body.getLogin();
+        LOGGER.info("");
+        LOGGER.info("/signup: login = " + login);
 
         final Pair<AccountService.UpdateStatus, Id<User>> updateStatusIdPair =
                 accountService.addUser(body);
@@ -48,25 +53,30 @@ public class UserController {
         switch (status) {
             case SUCCESS:
                 httpSession.setAttribute(USER_ID, updateStatusIdPair.getArg2().asLong());
+                LOGGER.info("/signup: " + USER_ID + " -> " + httpSession.getAttribute(USER_ID));
                 return ResponseEntity
                         .status(HttpStatus.CREATED)
                         .body(new Message("User has successfully registered!"));
 
             case EMAIL_CONFLICT:
+                LOGGER.info("/signup: email conflict");
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(new Message("User with same email exists"));
 
             case LOGIN_CONFLICT:
+                LOGGER.info("/signup: login conflict");
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(new Message("User with same login exists"));
 
             case EMAIL_AND_LOGIN_CONFLICT:
+                LOGGER.info("/signup: email and login conflict");
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(new Message("User with same login and same email exists"));
             default:
+                LOGGER.info("/signup: this line can't be printed");
                 return ResponseEntity
                         .status(500)
                         .body(new Message("if U C this, so, better call Soul!"));
@@ -84,13 +94,14 @@ public class UserController {
         switch (statusIdPair.getArg1()) {
             case SUCCESS:
                 httpSession.setAttribute(USER_ID, statusIdPair.getArg2().asLong());
+                LOGGER.info("/signin: " + USER_ID + " -> " + httpSession.getAttribute(USER_ID));
                 return ResponseEntity
                         .status(HttpStatus.OK)
                         .body(new Message("User has sighed in"));
 
             case USER_NOT_EXISTS:
                 return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
+                        .status(HttpStatus.NOT_FOUND)
                         .body(new Message("User does nit exist"));
 
             case WRONG_PASSWORD:
@@ -120,7 +131,7 @@ public class UserController {
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new Message("User is deleted."));
+                    .body(new Message("User is forbidden"));
         }
 
         return ResponseEntity
@@ -128,7 +139,7 @@ public class UserController {
                 .body(new UserFullInfo(user));
     }
 
-    @PostMapping(path = "/signout", produces = JSON)
+    @GetMapping(path = "/signout", produces = JSON)
     public ResponseEntity<Message> signout(HttpSession httpSession) {
 
         if (httpSession.getAttribute(USER_ID) == null) {
@@ -213,6 +224,36 @@ public class UserController {
                         .body(new Message("If you see this message, call Sanchez!"));
 
         }
+    }
+
+    @PostMapping(path = "/allusers", consumes = JSON, produces = JSON)
+    public ResponseEntity selectAllUsers(@RequestBody SelectUsersByLoginPrefix body, HttpSession httpSession) {
+
+        final Long id = (Long) httpSession.getAttribute(USER_ID);
+
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Message("User is not authorized"));
+        }
+
+        final User user = accountService.getUserById(id);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new Message("User is forbidden"));
+        }
+
+        final ArrayList<UserView> userViews = accountService.selectUsersByLoginPrefix(body, user);
+
+        if (userViews == null || userViews.size() == 0) {
+            LOGGER.info("/user/friends: userViews is empty");
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new Message("We are alone"));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userViews);
     }
 
 }

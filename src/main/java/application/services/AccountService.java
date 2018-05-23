@@ -5,29 +5,37 @@ import application.dao.UserDAO;
 import application.models.User;
 import application.models.id.Id;
 import application.utils.omgjava.Pair;
+import application.utils.requests.SelectUsersByLoginPrefix;
 import application.utils.requests.UserSignUpRequest;
 
-import application.utils.responses.Score;
-import application.utils.responses.ScoreData;
-import application.utils.responses.ScoreView;
-import application.utils.responses.UserInfo;
+import application.utils.responses.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 public class AccountService {
+
     @NotNull
     private final UserDAO userDB;
 
     @NotNull
     private final PasswordEncoder encoder;
+
+    @NotNull
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
+
 
     public enum ChangePasswordStatus {
         SUCCESS,
@@ -56,6 +64,11 @@ public class AccountService {
     public AccountService(@NotNull UserDAO userDB, @NotNull PasswordEncoder encoder) {
         this.userDB = userDB;
         this.encoder = encoder;
+    }
+
+    @PostConstruct
+    private void init() {
+        LOGGER.info("created AccountService object");
     }
 
 
@@ -103,10 +116,11 @@ public class AccountService {
                 : new Pair<>(AuthCheckStatus.WRONG_PASSWORD, null);
     }
 
+    
     public ChangePasswordStatus changePassword(@NotNull String login,
                                                @NotNull String oldPassword,
                                                @NotNull String newPassword) {
-        final User user = userDB.getUserByEmail(login);
+        final User user = userDB.getUserByLogin(login);
         if (user == null) {
             return ChangePasswordStatus.USER_NOT_EXISTS;
         }
@@ -170,20 +184,40 @@ public class AccountService {
         }
     }
 
-
-    public UpdateStatus updateUser(@NotNull String login, @NotNull Map<String, Object> data) {
-        final User user = userDB.getUserByLogin(login);
+    public UpdateStatus updateUser(long id, @NotNull Map<String, Object> data) {
+        final User user = userDB.getUserById(id);
         return updateUser(user, data);
     }
 
-    public UpdateStatus updateUser(@NotNull long id, @NotNull Map<String, Object> data) {
-        final User user = userDB.getUserById(id);
-        return updateUser(user, data);
+    public @Nullable ArrayList<UserView> selectUsersByLoginPrefix(@NotNull SelectUsersByLoginPrefix friendNamePrefix,
+                                                              @NotNull User user) {
+        String prefix = null;
+        if (!friendNamePrefix.getPrefix().equals("")) {
+            prefix = friendNamePrefix.getPrefix();
+        }
+
+        final List<UserView> userViews = userDB.selectUsersByLoginPrefix(prefix);
+        if (userViews == null) {
+            return new ArrayList<>();
+        }
+        return userViews.stream()
+                .filter(userView -> (!userView.getLogin().equals(user.getLogin())))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Nullable
     public User getUserById(long id) {
         final User user = userDB.getUserById(id);
+
+        if (user != null) {
+            user.setPassword("");
+        }
+        return user;
+    }
+
+    @Nullable
+    public User getUserByLogin(String login) {
+        final User user = userDB.getUserByLogin(login);
 
         if (user != null) {
             user.setPassword("");

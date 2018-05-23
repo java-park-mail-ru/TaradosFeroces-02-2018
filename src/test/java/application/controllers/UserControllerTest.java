@@ -8,7 +8,10 @@ import com.google.gson.Gson;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
@@ -32,6 +35,14 @@ import java.util.TreeMap;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 public class UserControllerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserControllerTest.class);
+
+    @Autowired
+    AccountService accountService;
+
+    @Autowired
+    MockMvc mock;
 
     private String toJSON(Map<String, Object> data) {
         Gson gson = new Gson();
@@ -66,11 +77,12 @@ public class UserControllerTest {
     }
 
 
-    @Autowired
-    AccountService accountService;
-
-    @Autowired
-    MockMvc mock;
+    @BeforeAll
+    public void info() {
+        LOGGER.info("accountService: " + accountService);
+        LOGGER.info("mock: " + mock);
+        LOGGER.info("start User Service Tests");
+    }
 
 
     @Test
@@ -82,11 +94,9 @@ public class UserControllerTest {
         data.put("int_value", 42);
         data.put("str_value", "Better call Soul!");
 
-        Assert.assertTrue(
-                "Elementary heterogeneous map",
-                toJSON(data)
-                        .equals("{\"int_value\":42,\"str_value\":\"Better call Soul!\"}")
-        );
+        Assert.assertEquals("Elementary heterogeneous map",
+                "{\"int_value\":42,\"str_value\":\"Better call Soul!\"}",
+                toJSON(data));
 
         data.clear();
         String[] strArray = {"line1", "line_2", "line 3", "line \""};
@@ -94,30 +104,35 @@ public class UserControllerTest {
         Object[] objArray = {42L, "str", -54.3, "sep line"};
         data.put("getero_list", objArray);
 
-        System.out.println();
 
-        Assert.assertTrue(
-                "Heterogeneous map with arrays, gson() -> |" + toJSON(data) + "|",
-                toJSON(data)
-                        .equals("{\"getero_list\":[42,\"str\",-54.3,\"sep line\"]," +
-                                "\"str_list\":[\"line1\",\"line_2\",\"line 3\",\"line \\\"\"]}")
-
-        );
+        Assert.assertEquals("Heterogeneous map with arrays, gson() -> |" + toJSON(data) + "|",
+                toJSON(data),
+                "{\"getero_list\":[42,\"str\",-54.3,\"sep line\"]," +
+                "\"str_list\":[\"line1\",\"line_2\",\"line 3\",\"line \\\"\"]}");
     }
 
     @Test
     public void successfulySignup() throws Exception {
+        LOGGER.info("successfulySignup ----------------------------------------------");
+
+        final String userStringRequest1 = toJSON(makeUser("superlogin", "a@java.ru",
+                "1234", null, null));
+        final String userStringRequest2 = toJSON(makeUser("alex_kuz", "ad.kuznetsov.b3@cpp.ru",
+                "145", "Alexander Kuzyakin", "SUPERAVAINBASE64CODE"));
+
+        LOGGER.info("userStringRequest1 = " + userStringRequest1);
+        LOGGER.info("userStringRequest2 = " + userStringRequest2);
+
         mock.perform(
                 post("/api/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("superlogin", "a@java.ru", "1234", null, null)))
+                        .content(userStringRequest1)
         ).andExpect(status().is2xxSuccessful());
 
         mock.perform(
                 post("/api/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("alex_kuz", "ad.kuznetsov.b3@cpp.ru",
-                                "145", "Alexander Kuzyakin", "SUPERAVAINBASE64CODE")))
+                        .content(userStringRequest2)
         ).andExpect(status().is2xxSuccessful());
     }
 
@@ -126,17 +141,28 @@ public class UserControllerTest {
 
         successfulySignup();
 
+        LOGGER.info("conflictSignup ----------------------------------------------");
+
+        final String conflictUserStringRequest1 = toJSON(makeUser("email_conflict", "a@java.ru",
+                "1234", null, null));
+        final String conflictUserStringRequest2 = toJSON(makeUser("alex_kuz", "login_conflict@Mail.ru",
+                "145", "Alexander Kuzyakin", "SUPERAVATARINBASE64CODE"));
+
+
+        LOGGER.info("conflictUserStringRequest1 = " + conflictUserStringRequest1);
+        LOGGER.info("conflictUserStringRequest2 = " + conflictUserStringRequest2);
+
+
         mock.perform(
                 post("/api/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("email_conflict", "a@java.ru", "1234", null, null)))
+                        .content(conflictUserStringRequest1)
         ).andExpect(status().isConflict());
 
         mock.perform(
                 post("/api/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJSON(makeUser("alex_kuz", "login_conflict@Mail.ru",
-                                "145", "Alexander Kuzyakin", "SUPERAVATARINBASE64CODE")))
+                        .content(conflictUserStringRequest2)
         ).andExpect(status().isConflict());
     }
 

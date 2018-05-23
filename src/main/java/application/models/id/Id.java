@@ -10,4 +10,8 @@ public class Id<T> {
     public long asLong() {
         return id;
     }
+
+    public static <T> Id<T> of(Long id) {
+        return new Id<>(id);
+    }
 }
