@@ -6,34 +6,28 @@ jdk:
 
 addons:
   postgresql: "9.6"
+  apt:
+    packages:
+      - sshpass
 
 services:
   - postgresql
-
-#branches:
-#  only:
-#  - develop
-#  - sandbox
-#  - docker
+  - mongodb
 
 before_install:
-    - export DEADLINEZ_PG_USER=tarados
-    - export DEADLINEZ_PG_PASSWORD="dh89cw9Gj9f_3jfr"
-    - export DEADLINEZ_PG_DB=tarados_db
     - psql -h 127.0.0.1 -c "create user $DEADLINEZ_PG_USER with password '$DEADLINEZ_PG_PASSWORD';" -U postgres
     - psql -h 127.0.0.1 -c "create database $DEADLINEZ_PG_DB;" -U postgres
     - psql -h 127.0.0.1 -c "grant all on database $DEADLINEZ_PG_DB to $DEADLINEZ_PG_USER;" -U postgres
+    - sleep 15
+    - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 
 script:
     - mvn test -B
 
-
-deploy:
-  provider: heroku
-  api_key:
-    secure: $HEROKU_API_KEY
-  app: deadlinez
-  on:
-    repo: Alex-Kuz/TaradosFeroces-02-2018
-    branch: develop
-  skip_cleanup: true
+after_success:
+    - zip -r -9 target.zip target/*
+    - sha256sum target.zip
+    - sha256sum target/deadlinez-1.0.0.jar
+    - scp -o StrictHostKeychecking=no target.zip $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - sshpass ssh -o StrictHostKeychecking=no $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && echo $SSH_SU_PASS | sudo -S ./deploy.sh && sha256sum target/deadlinez-1.0.0.jar"
+    

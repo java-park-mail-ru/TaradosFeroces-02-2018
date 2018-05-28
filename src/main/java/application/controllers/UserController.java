@@ -14,12 +14,15 @@ import application.utils.responses.ScoreData;
 import application.utils.responses.UserFullInfo;
 
 import application.utils.responses.UserView;
+import application.websockets.RemotePointService;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,17 +31,30 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*", allowCredentials = "true")
-@RequestMapping("/api")
+@RequestMapping(
+        path = BaseController.API_PATH,
+        produces = BaseController.JSON
+)
 public class UserController extends BaseController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-    private AccountService accountService;
+    @NotNull private AccountService accountService;
+    @NotNull private RemotePointService remotePointService;
 
-    public UserController(AccountService accountService) {
+
+    public UserController(@NotNull AccountService accountService,
+                          @NotNull RemotePointService remotePointService) {
         this.accountService = accountService;
+        this.remotePointService = remotePointService;
     }
 
-    @PostMapping(path = "/signup", consumes = JSON, produces = JSON)
+
+    @PostConstruct
+    void init() {
+        LOGGER.info("Created!");
+    }
+
+    @PostMapping(path = "/signup", consumes = BaseController.JSON)
     public ResponseEntity<Message> signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
 
         final String login = body.getLogin();
@@ -84,7 +100,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PostMapping(path = "/signin", consumes = JSON, produces = JSON)
+    @PostMapping(path = "/signin", consumes = BaseController.JSON)
     public ResponseEntity<Message> signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
 
         final Pair<AccountService.AuthCheckStatus, Id<User>> statusIdPair =
@@ -113,11 +129,10 @@ public class UserController extends BaseController {
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(new Message("Wow, h...how?!c "));
         }
-
     }
 
 
-    @GetMapping(path = "/user", produces = JSON)
+    @GetMapping("/user")
     public ResponseEntity whoami(HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
@@ -139,7 +154,7 @@ public class UserController extends BaseController {
                 .body(new UserFullInfo(user));
     }
 
-    @GetMapping(path = "/signout", produces = JSON)
+    @GetMapping("/signout")
     public ResponseEntity<Message> signout(HttpSession httpSession) {
 
         if (httpSession.getAttribute(USER_ID) == null) {
@@ -156,7 +171,7 @@ public class UserController extends BaseController {
     }
 
 
-    @PostMapping(path = "/leaderboard", consumes = JSON, produces = JSON)
+    @PostMapping(path = "/leaderboard", consumes = BaseController.JSON)
     public ResponseEntity score(@RequestBody ScoreRequest body, HttpSession httpSession) {
 
         final long position = body.getPosition();
@@ -176,7 +191,7 @@ public class UserController extends BaseController {
     }
 
 
-    @GetMapping(path = "/isauthorized", produces = JSON)
+    @GetMapping("/isauthorized")
     public ResponseEntity isAuthorized(HttpSession httpSession) {
         final Long id = (Long) httpSession.getAttribute(USER_ID);
 
@@ -188,7 +203,7 @@ public class UserController extends BaseController {
                 .body(map);
     }
 
-    @PostMapping(path = "/user/update", consumes = JSON, produces = JSON)
+    @PostMapping(path = "/user/update", consumes = BaseController.JSON)
     public ResponseEntity update(@RequestBody HashMap<String, Object> body, HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
@@ -226,7 +241,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PostMapping(path = "/allusers", consumes = JSON, produces = JSON)
+    @PostMapping(path = "/allusers", consumes = BaseController.JSON)
     public ResponseEntity selectAllUsers(@RequestBody SelectUsersByLoginPrefix body, HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
@@ -251,9 +266,10 @@ public class UserController extends BaseController {
                     .body(new Message("We are alone"));
         }
 
+        userViews.forEach(userView -> userView.setOnline(remotePointService.isConnected(userView.getId())));
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userViews);
     }
-
 }

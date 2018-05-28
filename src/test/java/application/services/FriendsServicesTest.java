@@ -8,6 +8,7 @@ import application.utils.requests.AddFriend;
 import application.utils.requests.SelectUsersByLoginPrefix;
 import application.utils.requests.UserSignUpRequest;
 import application.utils.responses.UserView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;

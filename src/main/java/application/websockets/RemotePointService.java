@@ -21,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RemotePointService {
+    private static final boolean DEBUG = true;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RemotePointService.class);
 
     private final ConcurrentHashMap<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
@@ -30,15 +32,27 @@ public class RemotePointService {
         this.objectMapper = objectMapper;
     }
 
-    private void logSessions() {
-        final Set<Map.Entry<Long, WebSocketSession>> entries = sessions.entrySet();
 
-        LOGGER.info("logSessions: -----------------------------");
-        for (Map.Entry<Long, WebSocketSession> idWebSocketSessionEntry: entries) {
-            LOGGER.info("       " + idWebSocketSessionEntry.getKey()
-                    + " -> " + idWebSocketSessionEntry.getValue().getId());
+    private void logSessions() {
+        if (DEBUG) {
+            final Set<Map.Entry<Long, WebSocketSession>> entries = sessions.entrySet();
+
+            LOGGER.info("logSessions: "
+                    + entries.stream()
+                        .map(idws -> (idws.getKey().toString() + " -> " + idws.getValue().getId()))
+                        .reduce("{ ", (lhs, rhs) -> (lhs + "; " + rhs))
+                        .concat(" }")
+            );
+
+            /*
+            for (Map.Entry<Long, WebSocketSession> idWebSocketSessionEntry : entries) {
+                LOGGER.info("       " + idWebSocketSessionEntry.getKey()
+                        + " -> " + idWebSocketSessionEntry.getValue().getId());
+            }
+            */
+
+            LOGGER.info("");
         }
-        LOGGER.info("");
     }
 
     @PostConstruct
@@ -53,11 +67,8 @@ public class RemotePointService {
 
         sessions.put(userId.asLong(), webSocketSession);
 
-        LOGGER.info("registerUser: after registerUser: session.size=" + sessions.size());
+        LOGGER.info("            : after registerUser: session.size=" + sessions.size());
         this.logSessions();
-
-        LOGGER.info("add user session: " + userId.asLong() + " -> " + webSocketSession.getId());
-        LOGGER.info("registerUser: sessions( " + userId.asLong() + " ) -> " + sessions.getOrDefault(userId, null));
     }
 
     public void removeUser(@NotNull Id<User> userId) {
@@ -66,11 +77,13 @@ public class RemotePointService {
         LOGGER.info("user session has been removed: " + userId.toString());
     }
 
-    public boolean isConnected(@NotNull Id<User> userId) {
+    public boolean isConnected(@NotNull Long userId) {
+
         LOGGER.info("isConnected: session.size=" + sessions.size());
         this.logSessions();
-        LOGGER.info("isConnected: sessions.containsKey( " + userId.asLong() + " ) = " + sessions.containsKey(userId.asLong()));
-        return sessions.containsKey(userId.asLong()) && sessions.get(userId.asLong()).isOpen();
+        LOGGER.info("isConnected: sessions.containsKey( " + userId + " ) = " + sessions.containsKey(userId));
+
+        return sessions.containsKey(userId) && sessions.get(userId).isOpen();
     }
 
     public void interruptConnection(@NotNull Id<User> userId, @NotNull CloseStatus closeStatus) {
@@ -79,30 +92,56 @@ public class RemotePointService {
             try {
                 webSocketSession.close(closeStatus);
             } catch (IOException ignore) {
-                System.out.println("42");
+                LOGGER.warn("interruptConnection: user.id=" + userId.asLong()
+                        + ", closeStatus: " + closeStatus.getReason());
             }
         }
     }
 
-    public void sendMessageToUser(@NotNull Id<User> userId, @NotNull Message message) throws IOException {
-        LOGGER.info("sendMessageToUser: user: " + userId.toString() + ", msg: " + message.getClass().getName());
+    public synchronized void sendMessageToUser(@NotNull Id<User> userId, @NotNull Message message) throws IOException {
+        LOGGER.info("sendMessageToUser:");
+        LOGGER.info("    : user: " + userId.asLong() + ", msg.class=" + message.getClass().getName());
 
         final WebSocketSession webSocketSession = sessions.get(userId.asLong());
         if (webSocketSession == null) {
-            LOGGER.info("sendMessageToUser: there is no session for user " + userId.toString());
+            LOGGER.info("    : there is no session for user.id=" + userId.asLong());
+
             throw new IOException("No websockets for user " + userId.asLong());
         }
-        LOGGER.info("sendMessageToUser: find for user " + userId.toString()
+
+        LOGGER.info("    : find for user.id=" + userId.asLong()
                     + " -> session " + webSocketSession.getId());
 
         if (!webSocketSession.isOpen()) {
-            LOGGER.info("sendMessageToUser: session " + webSocketSession.getId() + " is not open");
+            LOGGER.info("    : session " + webSocketSession.getId() + " is not open");
             throw new IOException("Websockets is closed or not exists: user " + userId);
         }
-        LOGGER.info("sendMessageToUser: available session " + webSocketSession.getId());
+
+        LOGGER.info("    : available session " + webSocketSession.getId());
 
         try {
-            LOGGER.info("sendMessageToUser: sending message: " + new TextMessage(objectMapper.writeValueAsString(message)));
+            final TextMessage textMessage = new TextMessage(objectMapper.writeValueAsString(message));
+
+            LOGGER.info("    : sending message.payload=" + textMessage.getPayload());
+
+            webSocketSession.sendMessage(textMessage);
+        } catch (IOException e) {
+            throw new IOException("Sending message error: user " + userId + ", error : " + e);
+        }
+    }
+
+    public synchronized void sendMessageToUserQuiet(@NotNull Id<User> userId, @NotNull Message message) throws IOException {
+
+        final WebSocketSession webSocketSession = sessions.get(userId.asLong());
+        if (webSocketSession == null) {
+            throw new IOException("No websockets for user " + userId.asLong());
+        }
+        if (!webSocketSession.isOpen()) {
+            throw new IOException("Websockets is closed or not exists: user " + userId);
+        }
+
+
+        try {
             webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
         } catch (IOException e) {
             throw new IOException("Sending message error: user " + userId + ", error : " + e);

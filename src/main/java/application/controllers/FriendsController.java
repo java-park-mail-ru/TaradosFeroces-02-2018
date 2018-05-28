@@ -11,6 +11,7 @@ import application.utils.requests.SelectUsersByLoginPrefix;
 import application.utils.responses.Message;
 
 import application.utils.responses.UserView;
+import application.websockets.RemotePointService;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,29 +19,42 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
 
 @RestController
 @CrossOrigin(origins = "*", allowCredentials = "true")
-@RequestMapping("/api/user/friend")
+@RequestMapping(
+        path = BaseController.API_PATH + "/user/friend",
+        produces = BaseController.JSON
+)
 public class FriendsController extends BaseController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FriendsController.class);
 
     @NotNull private FriendsService friendsService;
     @NotNull private AccountService accountService;
     @NotNull private NotificationService notificationService;
+    @NotNull private RemotePointService remotePointService;
 
     public FriendsController(@NotNull FriendsService friendsService,
                              @NotNull AccountService accountService,
-                             @NotNull NotificationService notificationService) {
+                             @NotNull NotificationService notificationService,
+                             @NotNull RemotePointService remotePointService) {
         this.friendsService = friendsService;
         this.accountService = accountService;
         this.notificationService = notificationService;
+        this.remotePointService = remotePointService;
     }
 
-    @PostMapping(path = "/add", consumes = JSON, produces = JSON)
+
+    @PostConstruct
+    void init() {
+        LOGGER.info("Created!");
+    }
+
+    @PostMapping(path = "/add", consumes = BaseController.JSON)
     public ResponseEntity addFriend(@RequestBody AddFriend body, HttpSession httpSession) {
 
         LOGGER.info("/api/user/friend/add");
@@ -72,11 +86,14 @@ public class FriendsController extends BaseController {
         final Long requestId = friendsService.addFriendshipRequest(user, friend);
         notificationService.askForFriendship(friend, user, requestId);
 
-        return null;
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Message("Friendship request has been sent"));
     }
 
-    @PostMapping(path = "/all", consumes = JSON, produces = JSON)
+    @PostMapping(path = "/all", consumes = BaseController.JSON)
     public ResponseEntity selectUserFriends(@RequestBody SelectUsersByLoginPrefix body, HttpSession httpSession) {
+
+        LOGGER.info("/user/friend/all: prefix='" + body.getPrefix() + "'");
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);
 
@@ -94,7 +111,7 @@ public class FriendsController extends BaseController {
         final List<UserView> allFriendsOfUser =
                 friendsService.getAllFriendsOfUser(id, body);
 
-        if (allFriendsOfUser == null || allFriendsOfUser.size() == 0) {
+        if (allFriendsOfUser == null || allFriendsOfUser.isEmpty()) {
             LOGGER.info("/user/friends: allFriendsOfUser is empty");
 
             return ResponseEntity
@@ -102,12 +119,15 @@ public class FriendsController extends BaseController {
                     .body(new Message("You are alone"));
         }
 
+        allFriendsOfUser.forEach(userView -> userView.setOnline(remotePointService.isConnected(userView.getId())));
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(allFriendsOfUser);
     }
 
-    @PostMapping(path = "/response", consumes = JSON, produces = JSON)
+
+    @PostMapping(path = "/response", consumes = BaseController.JSON)
     public ResponseEntity handleFriendshipResponse(@RequestBody FriendshipResponse body, HttpSession httpSession) {
 
         final Long id = (Long) httpSession.getAttribute(USER_ID);

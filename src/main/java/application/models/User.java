@@ -40,7 +40,7 @@ public class User {
     @Nullable
     private String avatar;
 
-    public User(@NotNull long id,
+    public User(long id,
                 @NotNull String login,
                 @NotNull String password,
                 @NotNull String email,
@@ -64,6 +64,7 @@ public class User {
         return id;
     }
 
+    @NotNull
     public String getLogin() {
         return login;
     }
@@ -72,6 +73,7 @@ public class User {
         this.login = login;
     }
 
+    @NotNull
     public String getPassword() {
         return password;
     }
@@ -80,6 +82,7 @@ public class User {
         this.password = password;
     }
 
+    @NotNull
     public String getEmail() {
         return email;
     }
@@ -92,15 +95,16 @@ public class User {
         return emailChecked;
     }
 
-    public void setEmailChecked(Boolean emailChecked) {
+    public void setEmailChecked(@Nullable Boolean emailChecked) {
         this.emailChecked = emailChecked;
     }
 
+    @Nullable
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
@@ -112,11 +116,12 @@ public class User {
         this.points = points;
     }
 
+    @Nullable
     public String getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(@Nullable String avatar) {
         this.avatar = avatar;
     }
 

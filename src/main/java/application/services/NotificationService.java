@@ -2,9 +2,9 @@ package application.services;
 
 import application.models.User;
 import application.models.id.Id;
-import application.session.messages.out.AddAsFriendRequest;
-import application.session.messages.out.InviteToParty;
-import application.session.messages.out.LeaveParty;
+import application.party.messages.out.AskForFriendship;
+import application.party.messages.out.InviteToParty;
+import application.party.messages.out.LeaveParty;
 import application.websockets.Message;
 import application.websockets.RemotePointService;
 
@@ -24,6 +24,7 @@ public class NotificationService {
     @NotNull
     private final RemotePointService remotePointService;
 
+
     public NotificationService(@NotNull RemotePointService remotePointService) {
         this.remotePointService = remotePointService;
     }
@@ -34,8 +35,8 @@ public class NotificationService {
                 + ", request_id=" + requestId);
 
         try {
-            if (remotePointService.isConnected(user.getUserId())) {
-                remotePointService.sendMessageToUser(user.getUserId(), new AddAsFriendRequest(sender, requestId));
+            if (remotePointService.isConnected(user.getId())) {
+                remotePointService.sendMessageToUser(user.getUserId(), new AskForFriendship(sender, requestId));
             } else {
                 LOGGER.info("askForFriendship: user is not connected now");
             }
@@ -50,7 +51,7 @@ public class NotificationService {
         LOGGER.info("askForPartyInvitation: user.id=" + user.getId() + ", leader.id=" + leader.getId());
 
         try {
-            if (remotePointService.isConnected(user.getUserId())) {
+            if (remotePointService.isConnected(user.getId())) {
                 remotePointService.sendMessageToUser(user.getUserId(), new InviteToParty(leader));
             } else {
                 LOGGER.info("                     : user is not connected now");
@@ -69,18 +70,16 @@ public class NotificationService {
         LOGGER.info("sendLeavePartyNotification: user.id=" + user.getId());
 
         try {
-            if (remotePointService.isConnected(user.getUserId())) {
+            if (remotePointService.isConnected(user.getId())) {
                 remotePointService.sendMessageToUser(user.getUserId(), new LeaveParty());
             } else {
                 LOGGER.info("                     : user is not connected now");
             }
-
         } catch (IOException ex) {
             LOGGER.warn(
                     String.format("                     : Failed to send LeaveParty message to user %s : ",
                             user.getId()), ex);
         }
-
         return true;
     }
 
@@ -89,15 +88,15 @@ public class NotificationService {
         LOGGER.info("           : message.class=" + message.getClass().getName());
 
         try {
-            if (remotePointService.isConnected(Id.of(userId))) {
+            if (remotePointService.isConnected(userId)) {
                 remotePointService.sendMessageToUser(Id.of(userId), message);
             } else {
-                LOGGER.info("    : receiver is not connected now");
+                LOGGER.info("           : receiver is not connected now");
                 return false;
             }
 
         } catch (IOException ex) {
-            LOGGER.warn("    : IOException: message.class=" + message.getClass().getName());
+            LOGGER.warn("           : IOException: message.class=" + message.getClass().getName());
         }
 
         return true;

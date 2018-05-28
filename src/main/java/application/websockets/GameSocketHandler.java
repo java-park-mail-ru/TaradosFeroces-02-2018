@@ -5,7 +5,7 @@ import application.models.id.Id;
 import application.services.AccountService;
 import application.controllers.UserController;
 
-import application.session.messages.out.Ping;
+import application.party.messages.out.Ping;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -40,6 +40,7 @@ public class GameSocketHandler extends TextWebSocketHandler {
                              @NotNull RemotePointService remotePointService,
                              ObjectMapper objectMapper) {
         LOGGER.info("creating GameSocketHandler object");
+
         this.accountService = accountService;
         this.messageHandlerContainer = messageHandlerContainer;
         this.remotePointService = remotePointService;
@@ -69,10 +70,11 @@ public class GameSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        LOGGER.info("afterConnectionEstablished: connection is established: user: " + id + ", ws: " + webSocketSession.getId());
+        LOGGER.info("afterConnectionEstablished: connection is established: user.id=" + id
+                + " -> ws.id=" + webSocketSession.getId());
 
         remotePointService.registerUser(Id.of(id), webSocketSession);
-        remotePointService.isConnected(Id.of(id));
+        remotePointService.isConnected(id);
         try {
             remotePointService.sendMessageToUser(Id.of(id), new Ping("Hello, my dear user!"));
         } catch (IOException e) {
@@ -84,41 +86,44 @@ public class GameSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(@NotNull WebSocketSession webSocketSession, TextMessage message) {
         LOGGER.info("");
         LOGGER.info("handleTextMessage: -----------------------");
-        LOGGER.info("handleTextMessage: ws_Session.id=" + webSocketSession.getId());
+        LOGGER.info("                 : ws_Session.id=" + webSocketSession.getId());
 
 
         if (!webSocketSession.isOpen()) {
-            LOGGER.info("handleTextMessage: webSocketSession is not opened");
+            LOGGER.info("                 : webSocketSession is not opened");
             return;
         }
 
-        LOGGER.info("handleTextMessage: ws.id=" + webSocketSession.getId());
+        LOGGER.info("                 : ws.id=" + webSocketSession.getId());
 
         final Long id = (Long) webSocketSession.getAttributes().get(USER_ID);
         final User user;
 
         if (id == null) {
-            LOGGER.info("handleTextMessage: userId is null");
+            LOGGER.info("                 : userId is null");
             return;
         } else {
             user = accountService.getUserById(id);
             if (user == null) {
-                LOGGER.info("handleTextMessage: there is no user with id " + id.toString());
+                LOGGER.info("                 : there is no user with id " + id.toString());
                 closeSession(webSocketSession, ACCESS_DENIED);
                 return;
             }
-            LOGGER.info("handleTextMessage: user_login: " + user.getLogin());
+            LOGGER.info("                 : user.login=" + user.getLogin());
         }
 
-        LOGGER.info("handleTextMessage: handling message: " + message);
+        LOGGER.info("                 : handling message.payload=" + message.getPayload());
         handleMessage(user, message);
     }
 
     private void handleMessage(User user, TextMessage text) {
+        LOGGER.info("");
+        LOGGER.info("handleMessage: -----------------------");
+
         final Message message;
         try {
             message = objectMapper.readValue(text.getPayload(), Message.class);
-            LOGGER.info("handleMessage: message: " + message);
+            LOGGER.info("             : message: " + message);
         } catch (IOException ex) {
             LOGGER.error("wrong json format at game response", ex);
             return;
@@ -126,7 +131,7 @@ public class GameSocketHandler extends TextWebSocketHandler {
 
         try {
             //noinspection ConstantConditions
-            LOGGER.info("handleMessage: handling message: " + message);
+            LOGGER.info("             : handling message: " + message);
             messageHandlerContainer.handle(message, user.getUserId());
         } catch (HandleException e) {
             LOGGER.error("Can't handle message of type " + message.getClass().getName() + " with content: " + text, e);
@@ -141,13 +146,17 @@ public class GameSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
+        LOGGER.info("afterConnectionClosed: " + webSocketSession.getId());
+
         final Long userId = (Long) webSocketSession.getAttributes().get(USER_ID);
         if (userId == null) {
             LOGGER.warn("User disconnected but his session was not found (closeStatus=" + closeStatus + ')');
             return;
         }
+
+        LOGGER.info("      : removing user.id=" + userId);
         remotePointService.removeUser(Id.of(userId));
-        LOGGER.info("remove user: " + userId.toString());
+        LOGGER.info("      : user has been removed (.id=" + userId.toString() + ")");
     }
 
     @Override

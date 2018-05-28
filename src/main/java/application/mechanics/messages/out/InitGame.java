@@ -1,40 +1,36 @@
 package application.mechanics.messages.out;
 
 
-import application.models.User;
-import application.models.id.Id;
+import application.mechanics.game.Scene;
+import application.mechanics.game.Avatar;
 import application.websockets.Message;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
+public class InitGame extends Message {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitGame.class);
 
-public class InitGame {
-    public static final class Request extends Message {
+    @NotNull
+    @JsonProperty("users")
+    private final ArrayList<Avatar.InitialAvatarSnap> users;
 
-        private Id<User> self;
-        private List<Id<User>> teammates = new ArrayList<>();
+    @NotNull
+    @JsonProperty("scene")
+    private final Scene scene;
 
 
-        @NotNull
-        public Id<User> getSelf() {
-            return self;
-        }
+    public InitGame(@NotNull ArrayList<Avatar.InitialAvatarSnap> users, @NotNull Scene scene) {
+        this.users = users;
+        this.scene = scene;
+        LOGGER.info("---Construct InitGame: users.size=" + users.size());
+    }
 
-        @NotNull
-        public List<Id<User>> getTeammates() {
-            return teammates;
-        }
-
-        public void setSelf(Id<User> self) {
-            this.self = self;
-        }
-
-        @NotNull
-        public void addTeammate(Id<User> user) {
-            teammates.add(user);
-        }
+    public int getUsersCount() {
+        return users.size();
     }
 }

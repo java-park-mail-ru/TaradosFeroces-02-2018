@@ -66,7 +66,11 @@ public class FriendsService {
             throw new UserDoesNotExist();
         }
 
-        return friendsDB.addFriend(userId, friend.getId());
+        if (!areTheyFriends(userId, friend.getId())) {
+            return friendsDB.addFriend(userId, friend.getId());
+        }
+
+        return true;
     }
 
     public boolean addFriend(long userId, long friendId) throws UserDoesNotExist {
