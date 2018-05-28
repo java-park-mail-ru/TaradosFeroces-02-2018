@@ -15,6 +15,9 @@ services:
   - mongodb
 
 before_install:
+    - export DEADLINEZ_PG_USER=deaduser
+    - export DEADLINEZ_PG_PASSWORD=deadpass
+    - export DEADLINEZ_PG_DB=deaddb
     - psql -h 127.0.0.1 -c "create user $DEADLINEZ_PG_USER with password '$DEADLINEZ_PG_PASSWORD';" -U postgres
     - psql -h 127.0.0.1 -c "create database $DEADLINEZ_PG_DB;" -U postgres
     - psql -h 127.0.0.1 -c "grant all on database $DEADLINEZ_PG_DB to $DEADLINEZ_PG_USER;" -U postgres
@@ -28,4 +31,4 @@ after_success:
     - zip -r -9 target.zip target/*
     - sha256sum target.zip
     - sha256sum target/deadlinez-1.0.0.jar
-   
+
