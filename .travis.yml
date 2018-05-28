@@ -28,6 +28,4 @@ after_success:
     - zip -r -9 target.zip target/*
     - sha256sum target.zip
     - sha256sum target/deadlinez-1.0.0.jar
-    - scp -o StrictHostKeychecking=no target.zip $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-    - sshpass ssh -o StrictHostKeychecking=no $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && echo $SSH_SU_PASS | sudo -S ./deploy.sh && sha256sum target/deadlinez-1.0.0.jar"
-    
+   
