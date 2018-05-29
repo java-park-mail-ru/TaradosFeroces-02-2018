@@ -15,6 +15,10 @@ public class ScoreData {
         this.arrayData = arrayData;
     }
 
+    public List<ScoreView> getArrayData() {
+        return arrayData;
+    }
+
     public ScoreData() {
         this.arrayData = new ArrayList<ScoreView>();
     }

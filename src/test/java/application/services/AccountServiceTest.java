@@ -7,6 +7,7 @@ import application.utils.omgjava.Pair;
 import application.utils.requests.AddFriend;
 import application.utils.requests.SelectUsersByLoginPrefix;
 import application.utils.requests.UserSignUpRequest;
+import application.utils.responses.ScoreData;
 import application.utils.responses.UserView;
 
 import org.jetbrains.annotations.NotNull;
@@ -167,6 +168,10 @@ public class AccountServiceTest {
 
             assertEquals((long) userSignUpRequest.getName().length(), user.getPoints());
         }
+
+        final ScoreData topUsers = accountService.getTopUsers(3, 1);
+
+        assertEquals(3, topUsers.getArrayData().size());
     }
 
 
