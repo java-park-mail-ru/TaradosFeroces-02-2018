@@ -94,10 +94,9 @@ public class FriendsDAOPostgres implements FriendsDAO {
         final String query = "SELECT COUNT(*) FROM friends WHERE id1 = ? AND id2 = ?;";
 
         try {
-            Long count = template.queryForObject(query, Long.class,
-                    userId, friendId);
-
+            Long count = template.queryForObject(query, Long.class, userId, friendId);
             return (count > 0);
+
         } catch (DataAccessException ex) {
             LOGGER.warn("DataAccessException: " + ex.getMessage());
             return false;

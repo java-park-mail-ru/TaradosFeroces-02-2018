@@ -38,12 +38,14 @@ public class UserDAOPostgres implements UserDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDAOPostgres.class);
 
     private static final RowMapper<User> USER_MAPPER = (res, num) ->
-            new User(res.getLong("id"),
+            new User(
+                    res.getLong("id"),
                     res.getString("login"),
                     res.getString("password"),
                     res.getString("email"),
                     res.getString("fullname"),
-                    res.getString("avatar")
+                    res.getString("avatar"),
+                    res.getLong("points")
             );
 
 
@@ -222,7 +224,7 @@ public class UserDAOPostgres implements UserDAO {
     public UserScore updateScore(@NotNull Long id, @NotNull Long newScore) {
         try {
             String query = "UPDATE users SET points = ? WHERE id = ?";
-            template.update(query, newScore);
+            template.update(query, newScore, id);
             return new UserScore(id, newScore);
 
         } catch (DataAccessException e) {

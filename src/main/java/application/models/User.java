@@ -56,6 +56,23 @@ public class User {
         this.avatar = avatar;
     }
 
+    public User(long id,
+                @NotNull String login,
+                @NotNull String password,
+                @NotNull String email,
+                @Nullable String name,
+                @Nullable String avatar,
+                long points) {
+        this.id = new Id<>(id);
+        this.login = login;
+        this.password = password;
+        this.email = email;
+        this.emailChecked = false;
+        this.name = name;
+        this.points = points;
+        this.avatar = avatar;
+    }
+
     public long getId() {
         return id.asLong();
     }

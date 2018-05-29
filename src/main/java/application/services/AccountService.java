@@ -225,6 +225,10 @@ public class AccountService {
         return user;
     }
 
+    public void updateScore(@NotNull User user, @NotNull Long newScore) {
+        userDB.updateScore(user.getId(), newScore);
+    }
+
     public ScoreData getTopUsers(long topCount, long start) {
 
         List<Map<String, Object>> top = userDB.getTopUsers(topCount, start);
