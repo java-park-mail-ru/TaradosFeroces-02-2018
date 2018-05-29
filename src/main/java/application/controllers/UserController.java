@@ -1,0 +1,275 @@
+package application.controllers;
+
+
+import application.models.User;
+import application.models.id.Id;
+import application.services.AccountService;
+import application.utils.omgjava.Pair;
+import application.utils.requests.ScoreRequest;
+import application.utils.requests.SelectUsersByLoginPrefix;
+import application.utils.requests.UserSignInRequest;
+import application.utils.requests.UserSignUpRequest;
+import application.utils.responses.Message;
+import application.utils.responses.ScoreData;
+import application.utils.responses.UserFullInfo;
+
+import application.utils.responses.UserView;
+import application.websockets.RemotePointService;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+
+@RestController
+@CrossOrigin(origins = "*", allowCredentials = "true")
+@RequestMapping(
+        path = BaseController.API_PATH,
+        produces = BaseController.JSON
+)
+public class UserController extends BaseController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+
+    @NotNull private AccountService accountService;
+    @NotNull private RemotePointService remotePointService;
+
+
+    public UserController(@NotNull AccountService accountService,
+                          @NotNull RemotePointService remotePointService) {
+        this.accountService = accountService;
+        this.remotePointService = remotePointService;
+    }
+
+
+    @PostConstruct
+    void init() {
+        LOGGER.info("Created!");
+    }
+
+    @PostMapping(path = "/signup", consumes = BaseController.JSON)
+    public ResponseEntity<Message> signup(@RequestBody UserSignUpRequest body, HttpSession httpSession) {
+
+        final String login = body.getLogin();
+        LOGGER.info("");
+        LOGGER.info("/signup: login = " + login);
+
+        final Pair<AccountService.UpdateStatus, Id<User>> updateStatusIdPair =
+                accountService.addUser(body);
+
+        final AccountService.UpdateStatus status = updateStatusIdPair.getArg1();
+
+        switch (status) {
+            case SUCCESS:
+                httpSession.setAttribute(USER_ID, updateStatusIdPair.getArg2().asLong());
+                LOGGER.info("/signup: " + USER_ID + " -> " + httpSession.getAttribute(USER_ID));
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(new Message("User has successfully registered!"));
+
+            case EMAIL_CONFLICT:
+                LOGGER.info("/signup: email conflict");
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with same email exists"));
+
+            case LOGIN_CONFLICT:
+                LOGGER.info("/signup: login conflict");
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with same login exists"));
+
+            case EMAIL_AND_LOGIN_CONFLICT:
+                LOGGER.info("/signup: email and login conflict");
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with same login and same email exists"));
+            default:
+                LOGGER.info("/signup: this line can't be printed");
+                return ResponseEntity
+                        .status(500)
+                        .body(new Message("if U C this, so, better call Soul!"));
+
+        }
+    }
+
+    @PostMapping(path = "/signin", consumes = BaseController.JSON)
+    public ResponseEntity<Message> signin(@RequestBody UserSignInRequest body, HttpSession httpSession) {
+
+        final Pair<AccountService.AuthCheckStatus, Id<User>> statusIdPair =
+                accountService.checkSignin(body.getLogin(), body.getPassword());
+
+
+        switch (statusIdPair.getArg1()) {
+            case SUCCESS:
+                httpSession.setAttribute(USER_ID, statusIdPair.getArg2().asLong());
+                LOGGER.info("/signin: " + USER_ID + " -> " + httpSession.getAttribute(USER_ID));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new Message("User has sighed in"));
+
+            case USER_NOT_EXISTS:
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(new Message("User does nit exist"));
+
+            case WRONG_PASSWORD:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("Wrong password"));
+            default:
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new Message("Wow, h...how?!c "));
+        }
+    }
+
+
+    @GetMapping("/user")
+    public ResponseEntity whoami(HttpSession httpSession) {
+
+        final Long id = (Long) httpSession.getAttribute(USER_ID);
+
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Message("User is not authorized"));
+        }
+
+        final User user = accountService.getUserById(id);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new Message("User is forbidden"));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new UserFullInfo(user));
+    }
+
+    @GetMapping("/signout")
+    public ResponseEntity<Message> signout(HttpSession httpSession) {
+
+        if (httpSession.getAttribute(USER_ID) == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new Message("User is not authorized"));
+        }
+
+        httpSession.removeAttribute(USER_ID);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new Message("User have gone!"));
+    }
+
+
+    @PostMapping(path = "/leaderboard", consumes = BaseController.JSON)
+    public ResponseEntity score(@RequestBody ScoreRequest body, HttpSession httpSession) {
+
+        final long position = body.getPosition();
+        final long count = body.getCount();
+
+        ScoreData scoreData = accountService.getTopUsers(count, position);
+
+        if (scoreData == null) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new Message("Empty list"));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(scoreData);
+    }
+
+
+    @GetMapping("/isauthorized")
+    public ResponseEntity isAuthorized(HttpSession httpSession) {
+        final Long id = (Long) httpSession.getAttribute(USER_ID);
+
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("is_authorized", id != null);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(map);
+    }
+
+    @PostMapping(path = "/user/update", consumes = BaseController.JSON)
+    public ResponseEntity update(@RequestBody HashMap<String, Object> body, HttpSession httpSession) {
+
+        final Long id = (Long) httpSession.getAttribute(USER_ID);
+
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Message("User is not authorized"));
+        }
+
+
+        final AccountService.UpdateStatus updateStatus = accountService.updateUser(id, body);
+
+        switch (updateStatus) {
+            case EMAIL_CONFLICT:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with this email exists"));
+            case LOGIN_CONFLICT:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User with this login exists"));
+            case USER_NOT_EXISTS:
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(new Message("User does not exist"));
+            case SUCCESS:
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new Message("User data successfully updated"));
+            default:
+                return ResponseEntity
+                        .status(500)
+                        .body(new Message("If you see this message, call Sanchez!"));
+
+        }
+    }
+
+    @PostMapping(path = "/allusers", consumes = BaseController.JSON)
+    public ResponseEntity selectAllUsers(@RequestBody SelectUsersByLoginPrefix body, HttpSession httpSession) {
+
+        final Long id = (Long) httpSession.getAttribute(USER_ID);
+
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Message("User is not authorized"));
+        }
+
+        final User user = accountService.getUserById(id);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new Message("User is forbidden"));
+        }
+
+        final ArrayList<UserView> userViews = accountService.selectUsersByLoginPrefix(body, user);
+
+        if (userViews == null || userViews.size() == 0) {
+            LOGGER.info("/user/friends: userViews is empty");
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new Message("We are alone"));
+        }
+
+        userViews.forEach(userView -> userView.setOnline(remotePointService.isConnected(userView.getId())));
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userViews);
+    }
+}
